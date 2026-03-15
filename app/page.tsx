@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
-import { useSearchParams } from "next/navigation";
 
 type StatsSubTab = "summary" | "teams" | "players";
 
@@ -57,8 +56,7 @@ const PLAYER_MATCH_STATS_KEY = "ligr:player-match-stats";
 const TEAM_MATCH_STATS_KEY = "ligr:team-match-stats";
 
 export default function HomePage() {
-  const searchParams = useSearchParams();
-  const isStatsView = searchParams.get("tab") === "stats";
+  const [isStatsView, setIsStatsView] = useState(false);
   const [loggedIn,setLoggedIn] = useState(false);
   const [adminOpen,setAdminOpen] = useState(false);
   const [email,setEmail] = useState("");
@@ -93,6 +91,22 @@ export default function HomePage() {
   const [selectedStatsPlayerKey, setSelectedStatsPlayerKey] = useState<string>("");
   const [teamStatsSearch, setTeamStatsSearch] = useState("");
   const [playerStatsSearch, setPlayerStatsSearch] = useState("");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const readStatsTab = () => {
+      const params = new URLSearchParams(window.location.search);
+      setIsStatsView(params.get("tab") === "stats");
+    };
+
+    readStatsTab();
+    window.addEventListener("popstate", readStatsTab);
+
+    return () => {
+      window.removeEventListener("popstate", readStatsTab);
+    };
+  }, []);
 
   useEffect(() => {
     if (!isStatsView || typeof window === "undefined") return;
