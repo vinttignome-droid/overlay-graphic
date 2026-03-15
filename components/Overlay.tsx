@@ -400,6 +400,23 @@ export default function Overlay() {
   const aboutToStartTimeoutRef = useRef<number | null>(null);
   const halftimeStatsTimeoutRef = useRef<number | null>(null);
 
+  const isGenericTeamName = (value: string) => {
+    const normalized = value.trim().toLowerCase();
+    return normalized === "home" || normalized === "away" || normalized === "koti" || normalized === "vieras";
+  };
+
+  const resolveTeamName = (incoming: unknown, fallback: string, previous: string) => {
+    const next = typeof incoming === "string" ? incoming.trim() : "";
+    if (!next) return fallback;
+
+    if (isGenericTeamName(next)) {
+      if (previous && !isGenericTeamName(previous)) return previous;
+      if (fallback && !isGenericTeamName(fallback)) return fallback;
+    }
+
+    return next;
+  };
+
   useEffect(() => {
     if (homeTeamFromQuery) setHomeTeam(homeTeamFromQuery);
     if (awayTeamFromQuery) setAwayTeam(awayTeamFromQuery);
@@ -621,8 +638,8 @@ export default function Overlay() {
   useEffect(() => {
     const applyEngineMessage = (d: Record<string, unknown>) => {
       if (d.type === "score") {
-        setHomeTeam((d.homeTeam as string) || "KOTI");
-        setAwayTeam((d.awayTeam as string) || "VIERAS");
+        setHomeTeam((prev) => resolveTeamName(d.homeTeam, homeTeamFromQuery || "KOTI", prev));
+        setAwayTeam((prev) => resolveTeamName(d.awayTeam, awayTeamFromQuery || "VIERAS", prev));
         setHomeScore(typeof d.homeScore === "number" ? d.homeScore : 0);
         setAwayScore(typeof d.awayScore === "number" ? d.awayScore : 0);
         setPeriod((d.period as string) || "1");
