@@ -1143,10 +1143,11 @@ export default function Overlay() {
     }
     return <span key={key} className="h-7 w-7 rounded-full border border-white/55 bg-white/10" />;
   };
+  const overlayHorizontalOffset = "-85mm";
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-transparent">
-      <div className="relative h-full w-full overflow-hidden bg-transparent">
+      <div className="relative h-full w-full overflow-hidden bg-transparent" style={{ transform: `translateX(${overlayHorizontalOffset})` }}>
       <AnimatePresence>
         {showPreMatchPreview && (
           <motion.div
