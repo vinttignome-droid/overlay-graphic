@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
+import { relaySubscribe } from "@/lib/realtimeRelay";
 
 const ENGINE_RELAY_KEY = "ligr:engine-relay";
 const DEFAULT_PLAYER_SILHOUETTE = `data:image/svg+xml;utf8,${encodeURIComponent(
@@ -608,6 +609,9 @@ export default function Overlay() {
         if (typeof d.homeKitColor === "string" && d.homeKitColor) setHomeKitColor(d.homeKitColor);
         if (typeof d.awayKitColor === "string" && d.awayKitColor) setAwayKitColor(d.awayKitColor);
         if (d.clockRunning === true) {
+          setShowPreMatchPreview(false);
+          setShowAboutToStart(false);
+          setShowHalftimeStats(false);
           setShowGameClock(true);
         }
         if (d.clockRunning === false) {
@@ -955,6 +959,15 @@ export default function Overlay() {
       }
     };
 
+    const unsubscribeRelay = relaySubscribe((payload) => {
+      const relayTs = Number(payload?.relayTs || 0);
+      if (Number.isFinite(relayTs) && relayTs > 0) {
+        if (relayTs <= lastRelayTsRef.current) return;
+        lastRelayTsRef.current = relayTs;
+      }
+      applyEngineMessage(payload);
+    });
+
     const onStorage = (event: StorageEvent) => {
       if (event.key === ENGINE_RELAY_KEY) {
         applyRelayPayload(event.newValue);
@@ -987,6 +1000,7 @@ export default function Overlay() {
       if (goalRecapTimeoutRef.current) {
         window.clearTimeout(goalRecapTimeoutRef.current);
       }
+      unsubscribeRelay();
       window.clearInterval(relayPoll);
       channel.close();
     };

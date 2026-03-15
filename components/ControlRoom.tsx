@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Sidebar from "@/components/Sidebar";
 import { motion } from "framer-motion";
+import { relayPublish } from "@/lib/realtimeRelay";
 
 interface ControlRoomProps {
   sport: string;
@@ -279,6 +280,7 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
     if (typeof window !== "undefined") {
       localStorage.setItem(ENGINE_RELAY_KEY, JSON.stringify(message));
     }
+    relayPublish(message);
   };
 
   useEffect(() => {

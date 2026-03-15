@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
+import { relayPublish, relaySubscribe } from "@/lib/realtimeRelay";
 
 type LiveEvent = {
   id: string;
@@ -235,6 +236,7 @@ export default function Livescore() {
     if (typeof window !== "undefined") {
       localStorage.setItem(ENGINE_RELAY_KEY, JSON.stringify(message));
     }
+    relayPublish(message);
   };
   const broadcastPenaltyShootout = (
     homeAttempts: PenaltyShootoutAttempt[] = homePenaltyShootout,
@@ -985,17 +987,16 @@ export default function Livescore() {
     const channel = new BroadcastChannel("ligr_full_clone_engine");
     engineChannelRef.current = channel;
 
-    channel.onmessage = (event) => {
-      const d = event.data;
+    const applyEngineMessage = (d: Record<string, unknown>) => {
       if (d.type === "score") {
-        setHomeTeam(d.homeTeam);
-        setAwayTeam(d.awayTeam);
-        setHomeScore(d.homeScore);
-        setAwayScore(d.awayScore);
-        setPeriod(d.period);
+        setHomeTeam(typeof d.homeTeam === "string" ? d.homeTeam : "HOME");
+        setAwayTeam(typeof d.awayTeam === "string" ? d.awayTeam : "AWAY");
+        setHomeScore(typeof d.homeScore === "number" ? d.homeScore : 0);
+        setAwayScore(typeof d.awayScore === "number" ? d.awayScore : 0);
+        setPeriod(typeof d.period === "string" ? d.period : "1");
         // Ignore ControlRoom clock heartbeat here so manual Livescore clock edits are not overwritten.
         if (d.source !== "control-room") {
-          setClock(d.clock);
+          setClock(typeof d.clock === "string" ? d.clock : "00:00");
           if (typeof d.clockRunning === "boolean") {
             setClockRunning(d.clockRunning);
           }
@@ -1007,6 +1008,8 @@ export default function Livescore() {
         }
       }
       if (d.type === "goal") {
+        const minute = typeof d.minute === "string" ? d.minute : "";
+        const text = typeof d.text === "string" ? d.text : "Maali!";
         setHomeScore((prev) => prev); // keep in sync via score message
         setFlashScore(true);
         setTimeout(() => setFlashScore(false), 1200);
@@ -1014,14 +1017,14 @@ export default function Livescore() {
           {
             id: `${Date.now()}`,
             type: "goal",
-            minute: d.minute ?? "",
-            text: d.text ?? "Maali!",
+            minute,
+            text,
           },
           ...prev,
         ]);
       }
       if (d.type === "penalty") {
-        const text: string = d.text ?? "";
+        const text = typeof d.text === "string" ? d.text : "";
         const isYellow = text.toLowerCase().includes("keltainen");
         const isRed = text.toLowerCase().includes("punainen");
         setEvents((prev) => [
@@ -1035,24 +1038,31 @@ export default function Livescore() {
         ]);
       }
       if (d.type === "lower") {
+        const text = typeof d.text === "string" ? d.text : "";
         setEvents((prev) => [
           {
             id: `${Date.now()}`,
             type: "sub",
             minute: "",
-            text: d.text ?? "",
+            text,
           },
           ...prev,
         ]);
       }
       if (d.type === "branding") {
-        setHomeLogo(d.homeLogo ?? "");
-        setAwayLogo(d.awayLogo ?? "");
-        setLeagueLogo(d.leagueLogo ?? "");
+        setHomeLogo(typeof d.homeLogo === "string" ? d.homeLogo : "");
+        setAwayLogo(typeof d.awayLogo === "string" ? d.awayLogo : "");
+        setLeagueLogo(typeof d.leagueLogo === "string" ? d.leagueLogo : "");
       }
     };
 
+    channel.onmessage = (event) => {
+      applyEngineMessage(event.data as Record<string, unknown>);
+    };
+    const unsubscribeRelay = relaySubscribe(applyEngineMessage);
+
     return () => {
+      unsubscribeRelay();
       channel.close();
       engineChannelRef.current = null;
     };
