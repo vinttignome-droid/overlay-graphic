@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { relaySubscribe } from "@/lib/realtimeRelay";
 
 const ENGINE_RELAY_KEY = "ligr:engine-relay";
+const OVERLAY_FHD_WIDTH = 1920;
+const OVERLAY_FHD_HEIGHT = 1080;
 const DEFAULT_PLAYER_SILHOUETTE = `data:image/svg+xml;utf8,${encodeURIComponent(
   "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' fill='transparent'/><circle cx='64' cy='44' r='22' fill='#9ca3af'/><path d='M22 118c2-24 18-38 42-38s40 14 42 38' fill='#9ca3af'/></svg>"
 )}`;
@@ -374,6 +376,7 @@ export default function Overlay() {
   const [halftimeStatsTitle, setHalftimeStatsTitle] = useState("1. jakso paattynyt");
   const [halftimeStatRows, setHalftimeStatRows] = useState<OverlayHalftimeStatRow[]>([]);
   const [nowMs, setNowMs] = useState(() => Date.now());
+  const [viewportSize, setViewportSize] = useState({ width: OVERLAY_FHD_WIDTH, height: OVERLAY_FHD_HEIGHT });
   const [homeRosterOverlay, setHomeRosterOverlay] = useState<OverlayRosterPanel>({
     visible: false,
     teamName: "",
@@ -414,6 +417,24 @@ export default function Overlay() {
     }, 30000);
 
     return () => window.clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const updateViewportSize = () => {
+      setViewportSize({
+        width: Math.max(1, window.innerWidth || OVERLAY_FHD_WIDTH),
+        height: Math.max(1, window.innerHeight || OVERLAY_FHD_HEIGHT),
+      });
+    };
+
+    updateViewportSize();
+    window.addEventListener("resize", updateViewportSize);
+
+    return () => {
+      window.removeEventListener("resize", updateViewportSize);
+    };
   }, []);
 
   useEffect(() => {
@@ -1143,11 +1164,24 @@ export default function Overlay() {
     }
     return <span key={key} className="h-7 w-7 rounded-full border border-white/55 bg-white/10" />;
   };
-  const overlayHorizontalOffset = "-85mm";
+  const overlayScale = Math.min(
+    viewportSize.width / OVERLAY_FHD_WIDTH,
+    viewportSize.height / OVERLAY_FHD_HEIGHT,
+  );
+  const safeOverlayScale = Number.isFinite(overlayScale) && overlayScale > 0 ? overlayScale : 1;
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-transparent">
-      <div className="relative h-full w-full overflow-hidden bg-transparent" style={{ transform: `translateX(${overlayHorizontalOffset})` }}>
+      <div
+        className="absolute left-1/2 top-1/2"
+        style={{
+          width: `${OVERLAY_FHD_WIDTH}px`,
+          height: `${OVERLAY_FHD_HEIGHT}px`,
+          transform: `translate(-50%, -50%) scale(${safeOverlayScale})`,
+          transformOrigin: "center center",
+        }}
+      >
+      <div className="relative h-full w-full overflow-hidden bg-transparent">
       <AnimatePresence>
         {showPreMatchPreview && (
           <motion.div
@@ -1415,7 +1449,9 @@ export default function Overlay() {
                       {kickoffTimeLabel ? `${kickoffDateLabel}  ${kickoffTimeLabel}` : (venue ? `Stadium: ${venue}` : "Live")}
                     </p>
                     <p className="px-4 text-center text-[30px] font-black uppercase tracking-[0.2em] text-cyan-50">{aboutToStartText}</p>
-                    <p className="text-right text-sm font-bold uppercase tracking-[0.24em] text-cyan-100/75">Ligr Live</p>
+                    <p className="text-right text-sm font-bold uppercase tracking-[0.24em] text-cyan-100/75">
+                      {venue ? "Ottelupaikka" : ""}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -2146,6 +2182,7 @@ export default function Overlay() {
           );
         })()}
       </AnimatePresence>
+      </div>
       </div>
     </div>
   );
