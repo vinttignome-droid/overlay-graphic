@@ -687,6 +687,7 @@ export default function Overlay() {
           setShowPreMatchPreview(false);
           setShowGameClock(false);
           setShowHalftimeStats(false);
+          setPenaltyText("");
           setShowPenalty(false);
           setShowAboutToStart(true);
           setAboutToStartText(typeof d.text === "string" && d.text.trim() ? d.text : "Ottelu alkaa pian");
@@ -1485,7 +1486,7 @@ export default function Overlay() {
 
       {/* ── PENALTY / EVENT ── */}
       <AnimatePresence>
-        {graphicsReady && showPenalty && (
+        {graphicsReady && showPenalty && !showAboutToStart && (
           <motion.div
             key="penalty"
             initial={{ x: "100%" }}
