@@ -944,20 +944,24 @@ export default function Overlay() {
       }
     };
 
-    const channel = new BroadcastChannel("ligr_full_clone_engine");
-    channel.onmessage = (event) => {
-      try {
-        const payload = event.data as Record<string, unknown>;
-        const relayTs = Number(payload?.relayTs || 0);
-        if (Number.isFinite(relayTs) && relayTs > 0) {
-          if (relayTs <= lastRelayTsRef.current) return;
-          lastRelayTsRef.current = relayTs;
+    const channel = typeof BroadcastChannel !== "undefined"
+      ? new BroadcastChannel("ligr_full_clone_engine")
+      : null;
+    if (channel) {
+      channel.onmessage = (event) => {
+        try {
+          const payload = event.data as Record<string, unknown>;
+          const relayTs = Number(payload?.relayTs || 0);
+          if (Number.isFinite(relayTs) && relayTs > 0) {
+            if (relayTs <= lastRelayTsRef.current) return;
+            lastRelayTsRef.current = relayTs;
+          }
+          applyEngineMessage(payload);
+        } catch {
+          // Ignore malformed channel payloads.
         }
-        applyEngineMessage(payload);
-      } catch {
-        // Ignore malformed channel payloads.
-      }
-    };
+      };
+    }
 
     const unsubscribeRelay = relaySubscribe((payload) => {
       const relayTs = Number(payload?.relayTs || 0);
@@ -1002,7 +1006,7 @@ export default function Overlay() {
       }
       unsubscribeRelay();
       window.clearInterval(relayPoll);
-      channel.close();
+      channel?.close();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [matchId, normalizedMatchId]);

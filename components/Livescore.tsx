@@ -984,7 +984,9 @@ export default function Livescore() {
   }, [awayTeam, homeTeam]);
 
   useEffect(() => {
-    const channel = new BroadcastChannel("ligr_full_clone_engine");
+    const channel = typeof BroadcastChannel !== "undefined"
+      ? new BroadcastChannel("ligr_full_clone_engine")
+      : null;
     engineChannelRef.current = channel;
 
     const applyEngineMessage = (d: Record<string, unknown>) => {
@@ -1056,14 +1058,16 @@ export default function Livescore() {
       }
     };
 
-    channel.onmessage = (event) => {
-      applyEngineMessage(event.data as Record<string, unknown>);
-    };
+    if (channel) {
+      channel.onmessage = (event) => {
+        applyEngineMessage(event.data as Record<string, unknown>);
+      };
+    }
     const unsubscribeRelay = relaySubscribe(applyEngineMessage);
 
     return () => {
       unsubscribeRelay();
-      channel.close();
+      channel?.close();
       engineChannelRef.current = null;
     };
   }, []);

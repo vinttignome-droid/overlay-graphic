@@ -263,6 +263,7 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
   const [teamImportName, setTeamImportName] = useState("");
   const [copiedMatchId, setCopiedMatchId] = useState<string | null>(null);
   const [productionUrlVersionByMatchId, setProductionUrlVersionByMatchId] = useState<Record<string, string>>({});
+  const engineChannelRef = useRef<BroadcastChannel | null>(null);
   const leaguesStorageKey = `ligr:${sport}:leagues`;
   const teamsStorageKey = `ligr:${sport}:teams`;
   const matchesStorageKey = `ligr:${sport}:matches`;
@@ -273,10 +274,9 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
   const [hasLoadedStorage, setHasLoadedStorage] = useState(false);
 
   /* ============= realtime engine ============= */
-  const channel = new BroadcastChannel("ligr_full_clone_engine");
   const relayEngineMessage = (payload: Record<string, unknown>) => {
     const message = { ...payload, relayTs: Date.now() };
-    channel.postMessage(message);
+    engineChannelRef.current?.postMessage(message);
     if (typeof window !== "undefined") {
       localStorage.setItem(ENGINE_RELAY_KEY, JSON.stringify(message));
     }
@@ -284,6 +284,10 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
   };
 
   useEffect(() => {
+    if (typeof BroadcastChannel === "undefined") return;
+    const channel = new BroadcastChannel("ligr_full_clone_engine");
+    engineChannelRef.current = channel;
+
     channel.onmessage = (event) => {
       const d = event.data;
       if (d.type === "score") {
@@ -383,7 +387,12 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
         setSponsorLogo(d.sponsorLogo);
       }
     };
-  }, [channel, sport]);
+
+    return () => {
+      channel.close();
+      engineChannelRef.current = null;
+    };
+  }, [sport]);
 
   useEffect(() => {
     if (!clockRunning || externalClockActive) return;
