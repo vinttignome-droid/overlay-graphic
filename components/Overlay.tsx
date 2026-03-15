@@ -1366,12 +1366,12 @@ export default function Overlay() {
               </div>
             ) : (
               <>
-                <div className="absolute bottom-8 left-1/2 w-[min(1600px,calc(100vw-3rem))] -translate-x-1/2">
-                  <div className="mx-auto w-full max-w-[1220px] rounded-t-[160px] border py-2 text-center text-[34px] font-black uppercase tracking-[0.12em] shadow-xl" style={{ borderColor: streamPalette.line, background: "rgba(10,107,114,0.95)", color: streamPalette.text }}>
+                <div className="absolute bottom-8 left-1/2 w-[calc(100vw-2rem)] max-w-[1220px] -translate-x-1/2">
+                  <div className="w-full rounded-t-[160px] border py-2 text-center text-[34px] font-black uppercase tracking-[0.12em] shadow-xl" style={{ borderColor: streamPalette.line, background: "rgba(10,107,114,0.95)", color: streamPalette.text }}>
                     {period}. jakso
                   </div>
 
-                  <div className="mx-auto mt-2 flex h-[66px] w-full max-w-[1220px] items-center border px-6 shadow-2xl" style={{ borderColor: streamPalette.line, background: "linear-gradient(to right, #0d8f96 0%, #0a6b72 50%, #0d8f96 100%)" }}>
+                  <div className="mt-2 flex h-[66px] w-full items-center border px-6 shadow-2xl" style={{ borderColor: streamPalette.line, background: "linear-gradient(to right, #0d8f96 0%, #0a6b72 50%, #0d8f96 100%)" }}>
                     <div className="flex w-[44%] items-center gap-3">
                       {homeLogo ? (
                         <img src={homeLogo} alt={homeTeam} className="h-14 w-14 object-contain" />
