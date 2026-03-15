@@ -1146,7 +1146,7 @@ export default function Overlay() {
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-transparent">
-      <div className="relative h-[1080px] w-[1920px] overflow-hidden bg-transparent">
+      <div className="relative h-full w-full overflow-hidden bg-transparent">
       <AnimatePresence>
         {showPreMatchPreview && (
           <motion.div
