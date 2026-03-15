@@ -1225,7 +1225,7 @@ export default function Overlay() {
             className="absolute inset-0 z-[35]"
           >
             {isPenaltyShootout ? (
-              <div className="absolute bottom-8 left-1/2 w-[1660px] -translate-x-1/2">
+              <div className="absolute bottom-8 left-1/2 w-[min(1660px,calc(100vw-3rem))] -translate-x-1/2">
                 <div className="mb-3 flex justify-center">
                   <div className="rounded-t-[160px] border px-20 py-2 text-center text-[34px] font-black uppercase tracking-[0.12em] shadow-xl" style={{ borderColor: streamPalette.line, background: "rgba(10,107,114,0.95)", color: streamPalette.text }}>
                     Rangaistuspotkut
@@ -1294,7 +1294,7 @@ export default function Overlay() {
                 </div>
               </div>
             ) : isRecapBoard ? (
-              <div className="absolute bottom-8 left-1/2 w-[1660px] -translate-x-1/2">
+              <div className="absolute bottom-8 left-1/2 w-[min(1660px,calc(100vw-3rem))] -translate-x-1/2">
                 <div className="mb-3 flex justify-center">
                   <div
                     className="rounded-t-[160px] border px-20 py-2 text-center text-[34px] font-black uppercase tracking-[0.12em] shadow-xl"
@@ -1366,12 +1366,12 @@ export default function Overlay() {
               </div>
             ) : (
               <>
-                <div className="absolute bottom-8 left-1/2 w-[1600px] -translate-x-1/2">
-                  <div className="mx-auto w-[1220px] rounded-t-[160px] border py-2 text-center text-[34px] font-black uppercase tracking-[0.12em] shadow-xl" style={{ borderColor: streamPalette.line, background: "rgba(10,107,114,0.95)", color: streamPalette.text }}>
+                <div className="absolute bottom-8 left-1/2 w-[min(1600px,calc(100vw-3rem))] -translate-x-1/2">
+                  <div className="mx-auto w-full max-w-[1220px] rounded-t-[160px] border py-2 text-center text-[34px] font-black uppercase tracking-[0.12em] shadow-xl" style={{ borderColor: streamPalette.line, background: "rgba(10,107,114,0.95)", color: streamPalette.text }}>
                     {period}. jakso
                   </div>
 
-                  <div className="mx-auto mt-2 flex h-[66px] w-[1220px] items-center border px-6 shadow-2xl" style={{ borderColor: streamPalette.line, background: "linear-gradient(to right, #0d8f96 0%, #0a6b72 50%, #0d8f96 100%)" }}>
+                  <div className="mx-auto mt-2 flex h-[66px] w-full max-w-[1220px] items-center border px-6 shadow-2xl" style={{ borderColor: streamPalette.line, background: "linear-gradient(to right, #0d8f96 0%, #0a6b72 50%, #0d8f96 100%)" }}>
                     <div className="flex w-[44%] items-center gap-3">
                       {homeLogo ? (
                         <img src={homeLogo} alt={homeTeam} className="h-14 w-14 object-contain" />
