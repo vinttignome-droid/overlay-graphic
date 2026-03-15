@@ -180,14 +180,8 @@ const getRotationVisualRows = (panel: OverlayRosterPanel) => {
   const formation = panel.formation || "4-3-3";
   const formationRoles = FOOTBALL_FORMATIONS[formation] || FOOTBALL_FORMATIONS["4-3-3"];
   const coords = FOOTBALL_FORMATION_COORDS[formation] || FOOTBALL_FORMATION_COORDS["4-3-3"];
-  const sourceRows = panel.rows.length > 0
-    ? panel.rows
-    : coords.map((_, idx) => ({
-        role: `${formation}-${idx}`,
-        player: panel.starting[idx] || "Ei valittu",
-      }));
 
-  return sourceRows
+  return panel.rows
     .map((row, idx) => {
       const prefix = `${formation}-`;
       const parsedIndex = row.role.startsWith(prefix)
@@ -1731,7 +1725,7 @@ export default function Overlay() {
       )}
 
       {/* ── LINEUP PANEL (lineup mode only) ── */}
-      {graphicsReady && visibleRosterPanel?.visible && visibleRosterPanel.mode === "lineup" && !(lineupOnlyFallback && getRotationVisualRows(visibleRosterPanel).length > 0) && (
+      {graphicsReady && visibleRosterPanel?.visible && (visibleRosterPanel.mode === "lineup" || lineupOnlyFallback) && (
         <div className="absolute bottom-6 left-6 z-30 w-[560px] overflow-hidden rounded-2xl p-4 shadow-2xl" style={{ background: "rgba(3,56,61,0.82)", color: streamPalette.text }}>
           <div className="rounded-xl px-4 py-3" style={{ background: "rgba(10,107,114,0.8)" }}>
             <div className="flex items-center justify-between gap-3">
@@ -1774,7 +1768,7 @@ export default function Overlay() {
       )}
 
       {/* ── FORMATION PITCH VIEW (rotation mode) ── */}
-      {graphicsReady && visibleRosterPanel?.visible && (visibleRosterPanel.mode === "rotation" || lineupOnlyFallback) && getRotationVisualRows(visibleRosterPanel).length > 0 && (() => {
+      {graphicsReady && visibleRosterPanel?.visible && visibleRosterPanel.mode === "rotation" && visibleRosterPanel.rows.length > 0 && (() => {
         const kitColor = isHomeRosterPanel ? homeKitColor : awayKitColor;
         const slots = getRotationVisualRows(visibleRosterPanel);
         const orderedSlots = [...slots].sort((a, b) => {
