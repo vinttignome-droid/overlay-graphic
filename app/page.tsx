@@ -52,12 +52,34 @@ type TeamMatchStatRecord = {
   teams: TeamMatchStatTeamEntry[];
 };
 
+type TeamStatsTotals = {
+  played: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goalsFor: number;
+  goalsAgainst: number;
+};
+
+type PlayerStatsTotals = {
+  minutesPlayed: number;
+  goals: number;
+  yellowCards: number;
+  redCards: number;
+  goalsConceded: number;
+  cleanSheets: number;
+  isGoalkeeper: boolean;
+};
+
 const PLAYER_MATCH_STATS_KEY = "ligr:player-match-stats";
 const TEAM_MATCH_STATS_KEY = "ligr:team-match-stats";
+const ADMIN_TEAM_OVERRIDES_KEY = "ligr:admin-team-stat-overrides";
+const ADMIN_PLAYER_OVERRIDES_KEY = "ligr:admin-player-stat-overrides";
 
 export default function HomePage() {
   const [isStatsView, setIsStatsView] = useState(false);
   const [loggedIn,setLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [adminOpen,setAdminOpen] = useState(false);
   const [email,setEmail] = useState("");
   const [password,setPassword] = useState("");
@@ -65,6 +87,7 @@ export default function HomePage() {
   const login = () => {
     if (email === "admin" && password === "admin") {
       setLoggedIn(true);
+      setIsAdmin(true);
       setAdminOpen(false);
       if (typeof window !== "undefined") {
         localStorage.setItem("isAdmin", "true");
@@ -91,6 +114,14 @@ export default function HomePage() {
   const [selectedStatsPlayerKey, setSelectedStatsPlayerKey] = useState<string>("");
   const [teamStatsSearch, setTeamStatsSearch] = useState("");
   const [playerStatsSearch, setPlayerStatsSearch] = useState("");
+  const [teamStatOverrides, setTeamStatOverrides] = useState<Record<string, TeamStatsTotals>>({});
+  const [playerStatOverrides, setPlayerStatOverrides] = useState<Record<string, PlayerStatsTotals>>({});
+  const [teamStatsEditDraft, setTeamStatsEditDraft] = useState<TeamStatsTotals | null>(null);
+  const [playerStatsEditDraft, setPlayerStatsEditDraft] = useState<PlayerStatsTotals | null>(null);
+
+  const normalizeKey = (value: string) => value.trim().toLowerCase();
+  const clampNonNegative = (value: number) => (Number.isFinite(value) && value >= 0 ? Math.floor(value) : 0);
+  const canEditStats = loggedIn || isAdmin;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -106,6 +137,83 @@ export default function HomePage() {
     return () => {
       window.removeEventListener("popstate", readStatsTab);
     };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const hasAdminSession = localStorage.getItem("isAdmin") === "true";
+    setIsAdmin(hasAdminSession);
+    if (hasAdminSession) setLoggedIn(true);
+
+    const rawTeamOverrides = localStorage.getItem(ADMIN_TEAM_OVERRIDES_KEY);
+    if (rawTeamOverrides) {
+      try {
+        const parsed = JSON.parse(rawTeamOverrides) as unknown;
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          const next = Object.fromEntries(
+            Object.entries(parsed as Record<string, unknown>)
+              .filter((entry): entry is [string, TeamStatsTotals] => {
+                if (typeof entry[0] !== "string") return false;
+                const value = entry[1] as Partial<TeamStatsTotals>;
+                return typeof value === "object" && value !== null;
+              })
+              .map(([key, value]) => {
+                const typed = value as Partial<TeamStatsTotals>;
+                return [
+                  key,
+                  {
+                    played: clampNonNegative(typeof typed.played === "number" ? typed.played : 0),
+                    wins: clampNonNegative(typeof typed.wins === "number" ? typed.wins : 0),
+                    draws: clampNonNegative(typeof typed.draws === "number" ? typed.draws : 0),
+                    losses: clampNonNegative(typeof typed.losses === "number" ? typed.losses : 0),
+                    goalsFor: clampNonNegative(typeof typed.goalsFor === "number" ? typed.goalsFor : 0),
+                    goalsAgainst: clampNonNegative(typeof typed.goalsAgainst === "number" ? typed.goalsAgainst : 0),
+                  },
+                ];
+              })
+          );
+          setTeamStatOverrides(next);
+        }
+      } catch {
+        // Ignore malformed admin override payload.
+      }
+    }
+
+    const rawPlayerOverrides = localStorage.getItem(ADMIN_PLAYER_OVERRIDES_KEY);
+    if (rawPlayerOverrides) {
+      try {
+        const parsed = JSON.parse(rawPlayerOverrides) as unknown;
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          const next = Object.fromEntries(
+            Object.entries(parsed as Record<string, unknown>)
+              .filter((entry): entry is [string, PlayerStatsTotals] => {
+                if (typeof entry[0] !== "string") return false;
+                const value = entry[1] as Partial<PlayerStatsTotals>;
+                return typeof value === "object" && value !== null;
+              })
+              .map(([key, value]) => {
+                const typed = value as Partial<PlayerStatsTotals>;
+                return [
+                  key,
+                  {
+                    minutesPlayed: clampNonNegative(typeof typed.minutesPlayed === "number" ? typed.minutesPlayed : 0),
+                    goals: clampNonNegative(typeof typed.goals === "number" ? typed.goals : 0),
+                    yellowCards: clampNonNegative(typeof typed.yellowCards === "number" ? typed.yellowCards : 0),
+                    redCards: clampNonNegative(typeof typed.redCards === "number" ? typed.redCards : 0),
+                    goalsConceded: clampNonNegative(typeof typed.goalsConceded === "number" ? typed.goalsConceded : 0),
+                    cleanSheets: clampNonNegative(typeof typed.cleanSheets === "number" ? typed.cleanSheets : 0),
+                    isGoalkeeper: typed.isGoalkeeper === true,
+                  },
+                ];
+              })
+          );
+          setPlayerStatOverrides(next);
+        }
+      } catch {
+        // Ignore malformed admin override payload.
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -312,7 +420,7 @@ export default function HomePage() {
   const selectedTeamStats = useMemo(() => {
     if (!selectedStatsTeam) return null;
 
-    const teamName = selectedStatsTeam.toLowerCase();
+    const teamName = normalizeKey(selectedStatsTeam);
 
     const directTeamRows = teamMatchStats
       .flatMap((record) => (Array.isArray(record.teams) ? record.teams : []))
@@ -335,7 +443,7 @@ export default function HomePage() {
         if (row.result === "loss") losses += 1;
       });
 
-      return {
+      const computed: TeamStatsTotals = {
         played,
         wins,
         draws,
@@ -343,6 +451,9 @@ export default function HomePage() {
         goalsFor,
         goalsAgainst,
       };
+
+      const override = teamStatOverrides[teamName];
+      return override ? { ...computed, ...override } : computed;
     }
 
     let played = 0;
@@ -374,7 +485,7 @@ export default function HomePage() {
       }
     });
 
-    return {
+    const computed: TeamStatsTotals = {
       played,
       wins,
       draws,
@@ -382,7 +493,96 @@ export default function HomePage() {
       goalsFor,
       goalsAgainst,
     };
-  }, [selectedStatsTeam, statsMatches, teamMatchStats]);
+
+    const override = teamStatOverrides[teamName];
+    return override ? { ...computed, ...override } : computed;
+  }, [normalizeKey, selectedStatsTeam, statsMatches, teamMatchStats, teamStatOverrides]);
+
+  const selectedPlayerTotals = useMemo(() => {
+    if (!selectedStatsPlayer) return null;
+
+    const fullName = `${selectedStatsPlayer.firstName} ${selectedStatsPlayer.lastName}`.trim();
+    const identityKey = toPlayerIdentityKey(fullName, selectedStatsPlayer.team || "");
+    const base = playerStatsByIdentity.get(identityKey) || {
+      minutesPlayed: 0,
+      goals: 0,
+      yellowCards: 0,
+      redCards: 0,
+      goalsConceded: 0,
+      cleanSheets: 0,
+      isGoalkeeper: false,
+    };
+    const override = playerStatOverrides[identityKey];
+    return override ? { ...base, ...override } : base;
+  }, [playerStatOverrides, playerStatsByIdentity, selectedStatsPlayer]);
+
+  useEffect(() => {
+    if (!selectedTeamStats) {
+      setTeamStatsEditDraft(null);
+      return;
+    }
+    setTeamStatsEditDraft(selectedTeamStats);
+  }, [selectedTeamStats]);
+
+  useEffect(() => {
+    if (!selectedPlayerTotals) {
+      setPlayerStatsEditDraft(null);
+      return;
+    }
+    setPlayerStatsEditDraft(selectedPlayerTotals);
+  }, [selectedPlayerTotals]);
+
+  const updateTeamDraftField = (field: keyof TeamStatsTotals, value: string) => {
+    const parsed = Number.parseInt(value, 10);
+    setTeamStatsEditDraft((prev) => {
+      if (!prev) return prev;
+      return { ...prev, [field]: clampNonNegative(Number.isFinite(parsed) ? parsed : 0) };
+    });
+  };
+
+  const updatePlayerDraftField = (field: keyof PlayerStatsTotals, value: string) => {
+    const parsed = Number.parseInt(value, 10);
+    setPlayerStatsEditDraft((prev) => {
+      if (!prev) return prev;
+      return { ...prev, [field]: clampNonNegative(Number.isFinite(parsed) ? parsed : 0) };
+    });
+  };
+
+  const saveTeamStatsOverride = () => {
+    if (!selectedStatsTeam || !teamStatsEditDraft || typeof window === "undefined") return;
+    const key = normalizeKey(selectedStatsTeam);
+    const next = { ...teamStatOverrides, [key]: teamStatsEditDraft };
+    setTeamStatOverrides(next);
+    localStorage.setItem(ADMIN_TEAM_OVERRIDES_KEY, JSON.stringify(next));
+  };
+
+  const clearTeamStatsOverride = () => {
+    if (!selectedStatsTeam || typeof window === "undefined") return;
+    const key = normalizeKey(selectedStatsTeam);
+    const next = { ...teamStatOverrides };
+    delete next[key];
+    setTeamStatOverrides(next);
+    localStorage.setItem(ADMIN_TEAM_OVERRIDES_KEY, JSON.stringify(next));
+  };
+
+  const savePlayerStatsOverride = () => {
+    if (!selectedStatsPlayer || !playerStatsEditDraft || typeof window === "undefined") return;
+    const fullName = `${selectedStatsPlayer.firstName} ${selectedStatsPlayer.lastName}`.trim();
+    const key = toPlayerIdentityKey(fullName, selectedStatsPlayer.team || "");
+    const next = { ...playerStatOverrides, [key]: playerStatsEditDraft };
+    setPlayerStatOverrides(next);
+    localStorage.setItem(ADMIN_PLAYER_OVERRIDES_KEY, JSON.stringify(next));
+  };
+
+  const clearPlayerStatsOverride = () => {
+    if (!selectedStatsPlayer || typeof window === "undefined") return;
+    const fullName = `${selectedStatsPlayer.firstName} ${selectedStatsPlayer.lastName}`.trim();
+    const key = toPlayerIdentityKey(fullName, selectedStatsPlayer.team || "");
+    const next = { ...playerStatOverrides };
+    delete next[key];
+    setPlayerStatOverrides(next);
+    localStorage.setItem(ADMIN_PLAYER_OVERRIDES_KEY, JSON.stringify(next));
+  };
 
   const filteredStatsTeams = useMemo(() => {
     const q = teamStatsSearch.trim().toLowerCase();
@@ -668,6 +868,24 @@ export default function HomePage() {
                           <p className="mt-1 text-2xl font-black text-gray-900">{selectedTeamStats.goalsAgainst}</p>
                         </div>
                       </div>
+
+                      {canEditStats && teamStatsEditDraft ? (
+                        <div className="mt-4 rounded-lg border border-blue-300 bg-white p-3">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">Admin: Muokkaa joukkuetilastoja</p>
+                          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+                            <Input type="number" min={0} value={String(teamStatsEditDraft.played)} onChange={(event) => updateTeamDraftField("played", event.target.value)} placeholder="Pelatut" />
+                            <Input type="number" min={0} value={String(teamStatsEditDraft.wins)} onChange={(event) => updateTeamDraftField("wins", event.target.value)} placeholder="Voitot" />
+                            <Input type="number" min={0} value={String(teamStatsEditDraft.draws)} onChange={(event) => updateTeamDraftField("draws", event.target.value)} placeholder="Tasapelit" />
+                            <Input type="number" min={0} value={String(teamStatsEditDraft.losses)} onChange={(event) => updateTeamDraftField("losses", event.target.value)} placeholder="Häviöt" />
+                            <Input type="number" min={0} value={String(teamStatsEditDraft.goalsFor)} onChange={(event) => updateTeamDraftField("goalsFor", event.target.value)} placeholder="Tehdyt" />
+                            <Input type="number" min={0} value={String(teamStatsEditDraft.goalsAgainst)} onChange={(event) => updateTeamDraftField("goalsAgainst", event.target.value)} placeholder="Päästetyt" />
+                          </div>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <Button type="button" onClick={saveTeamStatsOverride} className="bg-blue-600 hover:bg-blue-700">Tallenna</Button>
+                            <Button type="button" variant="outline" onClick={clearTeamStatsOverride}>Poista muokkaus</Button>
+                          </div>
+                        </div>
+                      ) : null}
                     </div>
                   ) : null}
 
@@ -710,8 +928,6 @@ export default function HomePage() {
 
                   {selectedStatsPlayer ? (() => {
                     const fullName = `${selectedStatsPlayer.firstName} ${selectedStatsPlayer.lastName}`.trim();
-                    const identityKey = toPlayerIdentityKey(fullName, selectedStatsPlayer.team || "");
-                    const totals = playerStatsByIdentity.get(identityKey);
                     return (
                       <div className="mt-5 rounded-xl border border-gray-200 bg-[#f3f4f6] p-3">
                         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[180px_1fr]">
@@ -731,29 +947,47 @@ export default function HomePage() {
                             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
                               <div className="rounded-md bg-white px-3 py-2">
                                 <p className="text-[11px] font-semibold text-gray-500">Peliaika</p>
-                                <p className="text-2xl font-black text-gray-900">{totals?.minutesPlayed ?? 0}</p>
+                                <p className="text-2xl font-black text-gray-900">{selectedPlayerTotals?.minutesPlayed ?? 0}</p>
                               </div>
                               <div className="rounded-md bg-white px-3 py-2">
                                 <p className="text-[11px] font-semibold text-gray-500">Tehdyt maalit</p>
-                                <p className="text-2xl font-black text-gray-900">{totals?.goals ?? 0}</p>
+                                <p className="text-2xl font-black text-gray-900">{selectedPlayerTotals?.goals ?? 0}</p>
                               </div>
                               <div className="rounded-md bg-white px-3 py-2">
                                 <p className="text-[11px] font-semibold text-gray-500">Keltaiset kortit</p>
-                                <p className="text-2xl font-black text-gray-900">{totals?.yellowCards ?? 0}</p>
+                                <p className="text-2xl font-black text-gray-900">{selectedPlayerTotals?.yellowCards ?? 0}</p>
                               </div>
                               <div className="rounded-md bg-white px-3 py-2">
                                 <p className="text-[11px] font-semibold text-gray-500">Punaiset kortit</p>
-                                <p className="text-2xl font-black text-gray-900">{totals?.redCards ?? 0}</p>
+                                <p className="text-2xl font-black text-gray-900">{selectedPlayerTotals?.redCards ?? 0}</p>
                               </div>
                               <div className="rounded-md bg-white px-3 py-2">
                                 <p className="text-[11px] font-semibold text-gray-500">Päästetyt maalit (MV)</p>
-                                <p className="text-2xl font-black text-gray-900">{totals?.isGoalkeeper ? totals.goalsConceded : "-"}</p>
+                                <p className="text-2xl font-black text-gray-900">{selectedPlayerTotals?.isGoalkeeper ? selectedPlayerTotals.goalsConceded : "-"}</p>
                               </div>
                               <div className="rounded-md bg-white px-3 py-2">
                                 <p className="text-[11px] font-semibold text-gray-500">Nollapelit (MV)</p>
-                                <p className="text-2xl font-black text-gray-900">{totals?.isGoalkeeper ? totals.cleanSheets : "-"}</p>
+                                <p className="text-2xl font-black text-gray-900">{selectedPlayerTotals?.isGoalkeeper ? selectedPlayerTotals.cleanSheets : "-"}</p>
                               </div>
                             </div>
+
+                            {canEditStats && playerStatsEditDraft ? (
+                              <div className="rounded-md border border-blue-300 bg-white p-3">
+                                <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">Admin: Muokkaa pelaajatilastoja</p>
+                                <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+                                  <Input type="number" min={0} value={String(playerStatsEditDraft.minutesPlayed)} onChange={(event) => updatePlayerDraftField("minutesPlayed", event.target.value)} placeholder="Peliaika" />
+                                  <Input type="number" min={0} value={String(playerStatsEditDraft.goals)} onChange={(event) => updatePlayerDraftField("goals", event.target.value)} placeholder="Maalit" />
+                                  <Input type="number" min={0} value={String(playerStatsEditDraft.yellowCards)} onChange={(event) => updatePlayerDraftField("yellowCards", event.target.value)} placeholder="Keltaiset" />
+                                  <Input type="number" min={0} value={String(playerStatsEditDraft.redCards)} onChange={(event) => updatePlayerDraftField("redCards", event.target.value)} placeholder="Punaiset" />
+                                  <Input type="number" min={0} value={String(playerStatsEditDraft.goalsConceded)} onChange={(event) => updatePlayerDraftField("goalsConceded", event.target.value)} placeholder="Päästetyt" />
+                                  <Input type="number" min={0} value={String(playerStatsEditDraft.cleanSheets)} onChange={(event) => updatePlayerDraftField("cleanSheets", event.target.value)} placeholder="Nollapelit" />
+                                </div>
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                  <Button type="button" onClick={savePlayerStatsOverride} className="bg-blue-600 hover:bg-blue-700">Tallenna</Button>
+                                  <Button type="button" variant="outline" onClick={clearPlayerStatsOverride}>Poista muokkaus</Button>
+                                </div>
+                              </div>
+                            ) : null}
 
                             <div className="h-12 rounded-md bg-[#dfe6ef]" />
                           </div>
