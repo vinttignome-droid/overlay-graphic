@@ -220,6 +220,7 @@ export default function Livescore() {
   const [awayLineup, setAwayLineup] = useState<TeamLineup>({ starting: [], bench: [] });
   const [homeRotation, setHomeRotation] = useState<{ formation: string; rows: RotationRow[] }>({ formation: "", rows: [] });
   const [awayRotation, setAwayRotation] = useState<{ formation: string; rows: RotationRow[] }>({ formation: "", rows: [] });
+  const [teamSetupReloadKey, setTeamSetupReloadKey] = useState(0);
   const [goalRecords, setGoalRecords] = useState<GoalRecord[]>([]);
   const [cardRecords, setCardRecords] = useState<CardRecord[]>([]);
   const [substitutionRecords, setSubstitutionRecords] = useState<SubstitutionRecord[]>([]);
@@ -981,7 +982,7 @@ export default function Livescore() {
     if (!awayRotationLoaded) {
       setAwayRotation({ formation: "", rows: [] });
     }
-  }, [awayTeam, homeTeam]);
+  }, [awayTeam, homeTeam, teamSetupReloadKey]);
 
   useEffect(() => {
     const channel = typeof BroadcastChannel !== "undefined"
@@ -1085,6 +1086,8 @@ export default function Livescore() {
   };
 
   const startPlayersEnteredSequence = () => {
+    // Always reload latest lineup/rotation from team settings when this sequence starts.
+    setTeamSetupReloadKey((prev) => prev + 1);
     setWorkflowPhase("players-entered");
     hidePreMatchPreview();
     setMatchStarted(false);
