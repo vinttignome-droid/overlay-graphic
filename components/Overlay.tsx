@@ -844,8 +844,21 @@ export default function Overlay() {
             };
           };
 
-          setHomeRosterOverlay(parseRosterPanel(d.home));
-          setAwayRosterOverlay(parseRosterPanel(d.away));
+          const nextHomePanel = parseRosterPanel(d.home);
+          const nextAwayPanel = parseRosterPanel(d.away);
+          const rosterVisible = nextHomePanel.visible || nextAwayPanel.visible;
+
+          setHomeRosterOverlay(nextHomePanel);
+          setAwayRosterOverlay(nextAwayPanel);
+
+          if (rosterVisible) {
+            // Roster mode should take focus over banners/cards when "Kokoonpanot" is triggered.
+            setShowPreMatchPreview(false);
+            setShowAboutToStart(false);
+            setShowHalftimeStats(false);
+            setShowGameClock(false);
+            setShowPenalty(false);
+          }
         }
       }
       if (d.type === "goal") {
