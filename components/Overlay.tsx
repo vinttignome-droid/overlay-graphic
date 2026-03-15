@@ -1366,42 +1366,59 @@ export default function Overlay() {
                 </div>
               </div>
             ) : (
-              <>
-                <div className="absolute bottom-8 left-1/2 w-[calc(100vw-2rem)] max-w-[1220px] -translate-x-1/2">
-                  <div className="w-full rounded-t-[160px] border py-2 text-center text-[34px] font-black uppercase tracking-[0.12em] shadow-xl" style={{ borderColor: streamPalette.line, background: "rgba(10,107,114,0.95)", color: streamPalette.text }}>
-                    {period}. jakso
-                  </div>
-
-                  <div className="mt-2 flex h-[66px] w-full items-center border px-6 shadow-2xl" style={{ borderColor: streamPalette.line, background: "linear-gradient(to right, #0d8f96 0%, #0a6b72 50%, #0d8f96 100%)" }}>
-                    <div className="flex w-[44%] items-center gap-3">
+              <div className="absolute inset-x-0 bottom-8 flex justify-center px-6">
+                <div
+                  className="w-full max-w-[1420px] overflow-hidden rounded-[30px] border shadow-2xl"
+                  style={{
+                    borderColor: "rgba(191,255,246,0.3)",
+                    background: "linear-gradient(135deg, rgba(7,76,82,0.94) 0%, rgba(5,54,59,0.97) 55%, rgba(3,41,46,0.98) 100%)",
+                    boxShadow: "0 20px 50px rgba(0,0,0,0.45)",
+                  }}
+                >
+                  <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-6 px-8 py-6">
+                    <div className="flex min-w-0 items-center gap-4">
                       {homeLogo ? (
-                        <img src={homeLogo} alt={homeTeam} className="h-14 w-14 object-contain" />
+                        <img src={homeLogo} alt={homeTeam} className="h-20 w-20 rounded-full border border-white/25 bg-white/10 object-contain p-1" />
                       ) : (
-                        <div className="flex h-14 w-14 items-center justify-center rounded-full text-2xl font-black" style={{ background: "rgba(255,255,255,0.2)", color: streamPalette.text }}>{homeTeam.slice(0, 1)}</div>
+                        <div className="flex h-20 w-20 items-center justify-center rounded-full border border-white/25 bg-white/10 text-3xl font-black text-white">{homeTeam.slice(0, 1)}</div>
                       )}
-                      <p className="text-[36px] font-black uppercase tracking-[0.03em]" style={{ color: streamPalette.text }}>{homeTeam}</p>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100/75">Koti</p>
+                        <p className="truncate text-[42px] font-black uppercase leading-none text-white">{homeTeam}</p>
+                      </div>
                     </div>
 
-                    <div className="flex w-[12%] justify-center">
-                      <div className="flex h-[68px] w-[170px] items-center justify-center rounded-full border text-[52px] font-black text-[#02363a] shadow-lg" style={{ borderColor: "rgba(7,72,77,0.28)", background: streamPalette.scoreBg }}>
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="rounded-full border border-white/35 bg-cyan-300/20 px-6 py-1 text-sm font-black uppercase tracking-[0.22em] text-cyan-100">
+                        {period}. jakso
+                      </div>
+                      <div className="rounded-[18px] border border-white/20 px-7 py-2 text-[56px] font-black leading-none text-[#083a3f]" style={{ background: "linear-gradient(180deg, #ecfffd 0%, #c8f4ec 100%)" }}>
                         {homeScore} - {awayScore}
                       </div>
                     </div>
 
-                    <div className="flex w-[44%] items-center justify-end gap-3 text-right">
-                      <p className="text-[36px] font-black uppercase tracking-[0.03em]" style={{ color: streamPalette.text }}>{awayTeam}</p>
+                    <div className="flex min-w-0 items-center justify-end gap-4">
+                      <div className="min-w-0 text-right">
+                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100/75">Vieras</p>
+                        <p className="truncate text-[42px] font-black uppercase leading-none text-white">{awayTeam}</p>
+                      </div>
                       {awayLogo ? (
-                        <img src={awayLogo} alt={awayTeam} className="h-14 w-14 object-contain" />
+                        <img src={awayLogo} alt={awayTeam} className="h-20 w-20 rounded-full border border-white/25 bg-white/10 object-contain p-1" />
                       ) : (
-                        <div className="flex h-14 w-14 items-center justify-center rounded-full text-2xl font-black" style={{ background: "rgba(255,255,255,0.2)", color: streamPalette.text }}>{awayTeam.slice(0, 1)}</div>
+                        <div className="flex h-20 w-20 items-center justify-center rounded-full border border-white/25 bg-white/10 text-3xl font-black text-white">{awayTeam.slice(0, 1)}</div>
                       )}
                     </div>
                   </div>
 
-                  <p className="mt-4 text-center text-2xl font-bold uppercase tracking-[0.24em]" style={{ color: streamPalette.textDim }}>{aboutToStartText}</p>
+                  <div className="grid grid-cols-[1fr_auto_1fr] items-center border-t border-white/15 px-8 py-4">
+                    <p className="text-lg font-semibold uppercase tracking-[0.12em] text-cyan-100/80">
+                      {kickoffTimeLabel ? `${kickoffDateLabel}  ${kickoffTimeLabel}` : (venue ? `Stadium: ${venue}` : "Live")}
+                    </p>
+                    <p className="px-4 text-center text-[30px] font-black uppercase tracking-[0.2em] text-cyan-50">{aboutToStartText}</p>
+                    <p className="text-right text-sm font-bold uppercase tracking-[0.24em] text-cyan-100/75">Ligr Live</p>
+                  </div>
                 </div>
-
-              </>
+              </div>
             )}
           </motion.div>
         )}
