@@ -658,7 +658,7 @@ export default function Overlay() {
           setAwayRosterOverlay((prev) => ({ ...prev, visible: false }));
         }
       }
-      if (d.type === "scene") setScene(d.scene);
+      if (d.type === "scene" && typeof d.scene === "string") setScene(d.scene);
       if (d.type === "matchStart") {
         const incomingMatchId = typeof d.matchId === "string" ? d.matchId.toLowerCase().trim() : "";
         if (!normalizedMatchId || !incomingMatchId || incomingMatchId === normalizedMatchId) {
@@ -773,26 +773,35 @@ export default function Overlay() {
       if (d.type === "teamRosterOverlay") {
         const incomingMatchId = typeof d.matchId === "string" ? d.matchId.toLowerCase().trim() : "";
         if (!normalizedMatchId || !incomingMatchId || incomingMatchId === normalizedMatchId) {
-          setHomeRosterOverlay({
-            visible: Boolean(d.home?.visible),
-            teamName: d.home?.teamName || "",
-            mode: d.home?.mode === "rotation" ? "rotation" : "lineup",
-            lineupOnly: Boolean(d.home?.lineupOnly),
-            formation: d.home?.formation || "",
-            rows: Array.isArray(d.home?.rows) ? d.home.rows : [],
-            starting: Array.isArray(d.home?.starting) ? d.home.starting : [],
-            bench: Array.isArray(d.home?.bench) ? d.home.bench : [],
-          });
-          setAwayRosterOverlay({
-            visible: Boolean(d.away?.visible),
-            teamName: d.away?.teamName || "",
-            mode: d.away?.mode === "rotation" ? "rotation" : "lineup",
-            lineupOnly: Boolean(d.away?.lineupOnly),
-            formation: d.away?.formation || "",
-            rows: Array.isArray(d.away?.rows) ? d.away.rows : [],
-            starting: Array.isArray(d.away?.starting) ? d.away.starting : [],
-            bench: Array.isArray(d.away?.bench) ? d.away.bench : [],
-          });
+          const parseRosterPanel = (value: unknown): OverlayRosterPanel => {
+            const panel: Record<string, unknown> = typeof value === "object" && value !== null
+              ? (value as Record<string, unknown>)
+              : {};
+            return {
+              visible: Boolean(panel.visible),
+              teamName: typeof panel.teamName === "string" ? panel.teamName : "",
+              mode: panel.mode === "rotation" ? "rotation" : "lineup",
+              lineupOnly: Boolean(panel.lineupOnly),
+              formation: typeof panel.formation === "string" ? panel.formation : "",
+              rows: Array.isArray(panel.rows)
+                ? panel.rows
+                    .map((row) => {
+                      if (typeof row !== "object" || row === null) return null;
+                      const rowRecord = row as Record<string, unknown>;
+                      return {
+                        role: typeof rowRecord.role === "string" ? rowRecord.role : "",
+                        player: typeof rowRecord.player === "string" ? rowRecord.player : "",
+                      };
+                    })
+                    .filter((row): row is { role: string; player: string } => row !== null)
+                : [],
+              starting: Array.isArray(panel.starting) ? panel.starting.filter((item): item is string => typeof item === "string") : [],
+              bench: Array.isArray(panel.bench) ? panel.bench.filter((item): item is string => typeof item === "string") : [],
+            };
+          };
+
+          setHomeRosterOverlay(parseRosterPanel(d.home));
+          setAwayRosterOverlay(parseRosterPanel(d.away));
         }
       }
       if (d.type === "goal") {
