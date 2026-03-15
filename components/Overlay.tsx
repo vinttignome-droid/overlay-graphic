@@ -687,6 +687,7 @@ export default function Overlay() {
           setShowPreMatchPreview(false);
           setShowGameClock(false);
           setShowHalftimeStats(false);
+          setShowPenalty(false);
           setShowAboutToStart(true);
           setAboutToStartText(typeof d.text === "string" && d.text.trim() ? d.text : "Ottelu alkaa pian");
           setHomeRosterOverlay((prev) => ({ ...prev, visible: false }));
