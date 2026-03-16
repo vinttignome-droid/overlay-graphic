@@ -1123,6 +1123,12 @@ export default function Livescore() {
         setAwayLogo(typeof d.awayLogo === "string" ? d.awayLogo : "");
         setLeagueLogo(typeof d.leagueLogo === "string" ? d.leagueLogo : "");
       }
+      if (d.type === "teamSetupUpdated") {
+        const incomingTeamName = typeof d.teamName === "string" ? d.teamName.trim() : "";
+        if (!incomingTeamName || incomingTeamName === homeTeam || incomingTeamName === awayTeam) {
+          setTeamSetupReloadKey((prev) => prev + 1);
+        }
+      }
     };
 
     if (channel) {
@@ -1137,7 +1143,7 @@ export default function Livescore() {
       channel?.close();
       engineChannelRef.current = null;
     };
-  }, []);
+  }, [awayTeam, homeTeam]);
 
   const hidePreMatchPreview = () => {
     const timestamp = String(Date.now());

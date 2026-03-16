@@ -1385,7 +1385,23 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
 
     const lineupText = `${lineupTeam}\nAvaus: ${starterNames || "-"}\nVaihtopelaajat: ${benchNames || "-"}`;
     setLineup(lineupText);
+    saveTeamSetup(lineupTeam);
     triggerLineup(lineupText);
+  };
+
+  const saveTeamSetup = (teamName = lineupTeam) => {
+    if (!teamName || typeof window === "undefined") return;
+
+    localStorage.setItem(lineupsStorageKey, JSON.stringify(lineupsByTeam));
+    localStorage.setItem(footballRotationsStorageKey, JSON.stringify(footballRotationsByTeam));
+
+    relayEngineMessage({
+      type: "teamSetupUpdated",
+      source: "control-room",
+      sport,
+      teamName,
+      savedAt: Date.now(),
+    });
   };
 
   const setFootballFormation = (formationKey: string) => {
@@ -1443,6 +1459,7 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
 
     const rotationText = `${lineupTeam} - Avausrotaatio ${footballFormation.key}\n${rotationRows.join("\n")}`;
     setLineup(rotationText);
+    saveTeamSetup(lineupTeam);
     triggerLineup(rotationText);
   };
 
@@ -1995,6 +2012,14 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
                         Tyhjennä
                       </Button>
                       <Button
+                        variant="outline"
+                        className="hover:bg-gray-50"
+                        onClick={() => saveTeamSetup(lineupTeam)}
+                        disabled={!lineupTeam}
+                      >
+                        Tallenna
+                      </Button>
+                      <Button
                         className="bg-blue-600 hover:bg-blue-700"
                         onClick={publishBuiltLineup}
                         disabled={!lineupTeam}
@@ -2154,6 +2179,14 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
                           disabled={!lineupTeam}
                         >
                           Tyhjennä rotaatio
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="hover:bg-gray-50"
+                          onClick={() => saveTeamSetup(lineupTeam)}
+                          disabled={!lineupTeam}
+                        >
+                          Tallenna rotaatio
                         </Button>
                         <Button
                           className="bg-blue-600 hover:bg-blue-700"
