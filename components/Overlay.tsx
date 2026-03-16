@@ -1261,7 +1261,7 @@ export default function Overlay() {
             {/* ── Main content ── */}
             <div className="flex flex-1 flex-col items-center justify-center gap-8">
               {leagueLogo ? (
-                <img src={leagueLogo} alt="League" className="h-20 object-contain drop-shadow-lg" />
+                <img src={leagueLogo} alt="League" className="h-24 object-contain drop-shadow-lg" />
               ) : null}
               <p className="text-[42px] font-semibold tracking-[0.06em]" style={{ color: streamPalette.textDim }}>Waiting for match</p>
               {venue ? (
@@ -1503,14 +1503,17 @@ export default function Overlay() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-[1fr_auto_1fr] items-center border-t border-white/15 px-8 py-4">
+                  <div className="grid grid-cols-[1fr_auto_1fr] items-center border-t border-white/15 px-8 py-3">
                     <p className="text-lg font-semibold uppercase tracking-[0.12em] text-cyan-100/80">
                       {kickoffTimeLabel ? `${kickoffDateLabel}  ${kickoffTimeLabel}` : "Live"}
                     </p>
                     <p className="px-4 text-center text-[30px] font-black uppercase tracking-[0.2em] text-cyan-50">{aboutToStartText}</p>
-                    <p className="text-right text-sm font-bold uppercase tracking-[0.24em] text-cyan-100/75">
-                      {venue ? `Stadium: ${venue}` : ""}
+                    <p className="text-right text-base font-semibold text-cyan-100/90">
+                      {venue ? `Stadium: ${venue}` : "Stadium: -"}
                     </p>
+                  </div>
+                  <div className="border-t border-white/10 px-8 py-2 text-center text-lg font-semibold text-cyan-50/95">
+                    {venue ? `Stadium: ${venue}` : "Stadium: -"}
                   </div>
                 </div>
               </div>
@@ -1817,7 +1820,7 @@ export default function Overlay() {
         });
         return (
           <div className="absolute inset-0 z-30 flex items-start justify-center pt-12">
-            <div className="flex h-[78%] w-[93%] flex-col overflow-hidden border border-white/20 bg-[#066d73]/95 shadow-2xl">
+            <div className="flex h-[78%] w-[90%] flex-col overflow-hidden border border-white/20 bg-[#066d73]/95 shadow-2xl">
               {/* Header bar */}
               <div className="flex h-[62px] shrink-0 items-center gap-3 border-b border-white/20 px-5" style={{ background: "rgba(0,0,0,0.42)" }}>
                 {visibleRosterLogo
@@ -1833,7 +1836,7 @@ export default function Overlay() {
                 <p className="text-[13px] font-semibold tracking-wide text-white/95">Stadium: {venue || "-"}</p>
               </div>
 
-              <div className="grid flex-1 grid-cols-[230px_1fr_220px]">
+              <div className="grid flex-1 grid-cols-[250px_1fr_250px]">
                 {/* Starting XI list */}
                 <div className="border-r border-white/20 bg-black/20 px-4 py-4">
                   <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-white/80">Avauskokoonpano</p>
@@ -1853,7 +1856,7 @@ export default function Overlay() {
                 {/* Pitch */}
                 <div className="relative overflow-hidden bg-gradient-to-b from-[#0b8b92] via-[#0a7f86] to-[#06656b]">
                   {/* Pitch outline & lines */}
-                  <div className="pointer-events-none absolute inset-x-8 inset-y-3 border-2 border-white/40">
+                  <div className="pointer-events-none absolute inset-x-14 inset-y-3 border-2 border-white/40">
                     <div className="absolute inset-0 bg-[repeating-linear-gradient(180deg,rgba(255,255,255,0.04)_0px,rgba(255,255,255,0.04)_34px,rgba(0,0,0,0.06)_34px,rgba(0,0,0,0.06)_68px)]" />
                     <div className="absolute left-0 right-0 top-1/2 h-[2px] -translate-y-px bg-white/40" />
                     <svg className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" width="130" height="130" viewBox="0 0 130 130">
@@ -1934,7 +1937,7 @@ export default function Overlay() {
       {/* ── LEAGUE LOGO ── */}
       {leagueLogo && (
         <div className="absolute top-4 left-4">
-          <img src={leagueLogo} alt="" className="h-14 object-contain" />
+          <img src={leagueLogo} alt="" className="h-20 object-contain" />
         </div>
       )}
 
