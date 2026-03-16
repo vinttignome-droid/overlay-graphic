@@ -330,9 +330,6 @@ export default function Livescore() {
   };
 
   useEffect(() => {
-    const channel = engineChannelRef.current;
-    if (!channel) return;
-
     sendEngineMessage(getRosterOverlayPayload());
   }, [
     awayLineup.bench,
@@ -354,8 +351,6 @@ export default function Livescore() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const channel = engineChannelRef.current;
-    if (!channel) return;
 
     const heartbeat = window.setInterval(() => {
       sendEngineMessage(getRosterOverlayPayload());
