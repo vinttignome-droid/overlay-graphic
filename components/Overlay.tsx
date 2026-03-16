@@ -1200,6 +1200,8 @@ export default function Overlay() {
   const isRecapBoard = isSecondHalfRecap || isHalftimeRecap || isMatchEndedRecap;
   const recapBoardLabel = isMatchEndedRecap ? "Ottelu on päättynyt" : isHalftimeRecap ? "Tauko" : "Jakso 2";
   const recapInfoLine = isMatchEndedRecap ? aboutToStartText : latestGoalLine;
+  const recapBoardMaxRows = Math.max(homeScorerLines.length, awayScorerLines.length, 1);
+  const recapBoardScale = Math.max(0.68, Math.min(1, 1 - Math.max(0, recapBoardMaxRows - 6) * 0.04));
   const homePenaltyScore = homePenaltyShootout.filter((item) => item.result === "scored").length;
   const awayPenaltyScore = awayPenaltyShootout.filter((item) => item.result === "scored").length;
   const penaltyRound = Math.min(5, Math.max(homePenaltyShootout.length, awayPenaltyShootout.length) + 1);
@@ -1377,7 +1379,10 @@ export default function Overlay() {
                 </div>
               </div>
             ) : isRecapBoard ? (
-              <div className="absolute bottom-8 left-1/2 w-[min(1660px,calc(100vw-3rem))] -translate-x-1/2">
+              <div
+                className="absolute bottom-8 left-1/2 w-[min(1660px,calc(100vw-3rem))] -translate-x-1/2"
+                style={{ transform: `translateX(-50%) scale(${recapBoardScale})`, transformOrigin: "bottom center" }}
+              >
                 <div className="mb-3 flex justify-center">
                   <div
                     className="rounded-t-[160px] border px-20 py-2 text-center text-[34px] font-black uppercase tracking-[0.12em] shadow-xl"
@@ -1997,10 +2002,6 @@ export default function Overlay() {
 
       <AnimatePresence>
         {graphicsReady && showGoalRecap && !showGoalScorer && goalRecapInfo && (() => {
-          const minuteNumber = Number.parseInt((goalRecapInfo.minute || "").split(":")[0] || "0", 10);
-          const minuteLabel = Number.isFinite(minuteNumber) ? `${Math.max(0, minuteNumber)}'` : goalRecapInfo.minute;
-          const scorerLabel = goalRecapInfo.scorer ? goalRecapInfo.scorer.toUpperCase() : "MAALINTEKIJA";
-          const scorerOnAway = goalRecapInfo.side === "away";
           const formatScorerMinute = (minuteValue: string) => {
             const parsedMinute = Number.parseInt((minuteValue || "").split(":")[0] || "0", 10);
             return Number.isFinite(parsedMinute) ? `${Math.max(0, parsedMinute)}'` : minuteValue;
@@ -2026,6 +2027,8 @@ export default function Overlay() {
           };
           const homeScorerLines = buildScorerLines("home");
           const awayScorerLines = buildScorerLines("away");
+          const maxScorerRows = Math.max(homeScorerLines.length, awayScorerLines.length, 1);
+          const recapScale = Math.max(0.72, Math.min(1, 1 - Math.max(0, maxScorerRows - 5) * 0.045));
           return (
             <motion.div
               key="goal-recap"
@@ -2038,6 +2041,8 @@ export default function Overlay() {
                 borderColor: streamPalette.line,
                 background: "linear-gradient(180deg, rgba(5,54,59,0.96) 0%, rgba(4,44,48,0.92) 100%)",
                 boxShadow: "0 12px 44px rgba(0,0,0,0.6)",
+                transform: `translateX(-50%) scale(${recapScale})`,
+                transformOrigin: "bottom center",
               }}
             >
               <div className="flex h-[66px] items-center border-b px-4" style={{ borderColor: streamPalette.line, background: "linear-gradient(to right, rgba(13,143,150,0.36) 0%, rgba(10,107,114,0.2) 50%, rgba(13,143,150,0.36) 100%)" }}>
@@ -2062,16 +2067,6 @@ export default function Overlay() {
                     : <div className="h-12 w-12 rounded-full bg-white/20" />
                   }
                 </div>
-              </div>
-
-              <div className="flex h-[34px] items-center px-5" style={{ background: "linear-gradient(90deg, rgba(3,56,61,0.9) 0%, rgba(6,72,77,0.84) 50%, rgba(3,56,61,0.9) 100%)" }}>
-                <p
-                  className={`text-[29px] font-black uppercase leading-none ${scorerOnAway ? "ml-auto text-right" : ""}`}
-                  style={{ letterSpacing: "0.02em" }}
-                >
-                  <span style={{ color: streamPalette.text }}>{scorerLabel}</span>
-                  <span className="ml-2" style={{ color: streamPalette.accentBright }}>{minuteLabel}</span>
-                </p>
               </div>
 
               <div className="border-t px-5 py-2" style={{ borderColor: streamPalette.line, background: "rgba(3,56,61,0.8)" }}>
