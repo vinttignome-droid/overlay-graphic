@@ -1217,6 +1217,11 @@ export default function Overlay() {
   const homePenaltyScore = homePenaltyShootout.filter((item) => item.result === "scored").length;
   const awayPenaltyScore = awayPenaltyShootout.filter((item) => item.result === "scored").length;
   const penaltyRound = Math.min(5, Math.max(homePenaltyShootout.length, awayPenaltyShootout.length) + 1);
+  const officialsLine = [
+    `Tuomari: ${refereeName || "-"}`,
+    `AET1: ${aet1Name || "-"}`,
+    `AET2: ${aet2Name || "-"}`,
+  ].join("  •  ");
   const renderPenaltyAttempt = (attempt: PenaltyShootoutAttempt | undefined, key: string) => {
     if (attempt?.result === "scored") {
       return <span key={key} className="flex h-7 w-7 items-center justify-center rounded-full border border-emerald-200/65 bg-emerald-500 text-sm font-black text-white">O</span>;
@@ -1526,8 +1531,8 @@ export default function Overlay() {
                       {venue ? `Stadium: ${venue}` : "Stadium: -"}
                     </p>
                   </div>
-                  <div className="border-t border-white/10 px-8 py-2 text-center text-lg font-semibold text-cyan-50/95">
-                    {venue ? `Stadium: ${venue}` : "Stadium: -"}
+                  <div className="border-t border-white/10 px-8 py-2 text-center text-base font-semibold text-cyan-50/95">
+                    {officialsLine}
                   </div>
                 </div>
               </div>
