@@ -1261,7 +1261,7 @@ export default function Overlay() {
             {/* ── Main content ── */}
             <div className="flex flex-1 flex-col items-center justify-center gap-8">
               {leagueLogo ? (
-                <img src={leagueLogo} alt="League" className="h-14 object-contain drop-shadow-lg" />
+                <img src={leagueLogo} alt="League" className="h-20 object-contain drop-shadow-lg" />
               ) : null}
               <p className="text-[42px] font-semibold tracking-[0.06em]" style={{ color: streamPalette.textDim }}>Waiting for match</p>
               {venue ? (
@@ -1505,11 +1505,11 @@ export default function Overlay() {
 
                   <div className="grid grid-cols-[1fr_auto_1fr] items-center border-t border-white/15 px-8 py-4">
                     <p className="text-lg font-semibold uppercase tracking-[0.12em] text-cyan-100/80">
-                      {kickoffTimeLabel ? `${kickoffDateLabel}  ${kickoffTimeLabel}` : (venue ? `Stadium: ${venue}` : "Live")}
+                      {kickoffTimeLabel ? `${kickoffDateLabel}  ${kickoffTimeLabel}` : "Live"}
                     </p>
                     <p className="px-4 text-center text-[30px] font-black uppercase tracking-[0.2em] text-cyan-50">{aboutToStartText}</p>
                     <p className="text-right text-sm font-bold uppercase tracking-[0.24em] text-cyan-100/75">
-                      {venue ? "Ottelupaikka" : ""}
+                      {venue ? `Stadium: ${venue}` : ""}
                     </p>
                   </div>
                 </div>
@@ -1816,10 +1816,10 @@ export default function Overlay() {
           return aTop - bTop;
         });
         return (
-          <div className="absolute inset-0 z-30 flex items-start justify-center pt-20">
-            <div className="flex h-[68%] w-[86%] flex-col overflow-hidden border border-white/20 bg-[#066d73]/95 shadow-2xl">
+          <div className="absolute inset-0 z-30 flex items-start justify-center pt-12">
+            <div className="flex h-[78%] w-[93%] flex-col overflow-hidden border border-white/20 bg-[#066d73]/95 shadow-2xl">
               {/* Header bar */}
-              <div className="flex h-[56px] shrink-0 items-center gap-3 border-b border-white/20 px-4" style={{ background: "rgba(0,0,0,0.42)" }}>
+              <div className="flex h-[62px] shrink-0 items-center gap-3 border-b border-white/20 px-5" style={{ background: "rgba(0,0,0,0.42)" }}>
                 {visibleRosterLogo
                   ? <img src={visibleRosterLogo} alt={visibleRosterPanel.teamName} className="h-10 w-10 object-contain drop-shadow" />
                   : <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-lg font-black text-white">{visibleRosterPanel.teamName.slice(0,1)}</div>
@@ -1829,15 +1829,15 @@ export default function Overlay() {
                 <p className="text-[22px] font-black uppercase tracking-[0.06em] text-white">FORMATION <span className="ml-2">{visibleRosterPanel.formation}</span></p>
               </div>
 
-              <div className="flex h-[24px] items-center border-b border-white/20 bg-[#0d8f96] px-4">
-                <p className="text-[12px] font-semibold tracking-wide text-white/95">{venue || "Stadium"}</p>
+              <div className="flex h-[30px] items-center border-b border-white/20 bg-[#0d8f96] px-5">
+                <p className="text-[13px] font-semibold tracking-wide text-white/95">Stadium: {venue || "-"}</p>
               </div>
 
-              <div className="grid flex-1 grid-cols-[220px_1fr_200px]">
+              <div className="grid flex-1 grid-cols-[230px_1fr_220px]">
                 {/* Starting XI list */}
                 <div className="border-r border-white/20 bg-black/20 px-4 py-4">
                   <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-white/80">Avauskokoonpano</p>
-                  <div className="space-y-1.5">
+                  <div className="max-h-full space-y-1.5 overflow-y-auto pr-1">
                     {orderedSlots.map((slot) => {
                       const num = getPlayerNumber(slot.player);
                       const lastName = getPlayerLastName(slot.player).toUpperCase();
@@ -1851,17 +1851,25 @@ export default function Overlay() {
                 </div>
 
                 {/* Pitch */}
-                <div className="relative overflow-hidden">
+                <div className="relative overflow-hidden bg-gradient-to-b from-[#0b8b92] via-[#0a7f86] to-[#06656b]">
                   {/* Pitch outline & lines */}
-                  <div className="pointer-events-none absolute inset-x-9 inset-y-4 border-2 border-white/40">
+                  <div className="pointer-events-none absolute inset-x-8 inset-y-3 border-2 border-white/40">
+                    <div className="absolute inset-0 bg-[repeating-linear-gradient(180deg,rgba(255,255,255,0.04)_0px,rgba(255,255,255,0.04)_34px,rgba(0,0,0,0.06)_34px,rgba(0,0,0,0.06)_68px)]" />
                     <div className="absolute left-0 right-0 top-1/2 h-[2px] -translate-y-px bg-white/40" />
                     <svg className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" width="130" height="130" viewBox="0 0 130 130">
                       <circle cx="65" cy="65" r="58" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="2" />
                     </svg>
+                    <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/60" />
                     <div className="absolute top-0 left-1/2 h-[22%] w-[44%] -translate-x-1/2 border-2 border-t-0 border-white/40" />
                     <div className="absolute top-0 left-1/2 h-[9%] w-[18%] -translate-x-1/2 border-2 border-t-0 border-white/40" />
+                    <div className="absolute left-1/2 top-[13%] h-2 w-2 -translate-x-1/2 rounded-full bg-white/60" />
                     <div className="absolute bottom-0 left-1/2 h-[22%] w-[44%] -translate-x-1/2 border-2 border-b-0 border-white/40" />
                     <div className="absolute bottom-0 left-1/2 h-[9%] w-[18%] -translate-x-1/2 border-2 border-b-0 border-white/40" />
+                    <div className="absolute left-1/2 bottom-[13%] h-2 w-2 -translate-x-1/2 rounded-full bg-white/60" />
+                    <div className="absolute left-0 top-0 h-8 w-8 rounded-br-full border-r-2 border-b-2 border-white/40" />
+                    <div className="absolute right-0 top-0 h-8 w-8 rounded-bl-full border-l-2 border-b-2 border-white/40" />
+                    <div className="absolute left-0 bottom-0 h-8 w-8 rounded-tr-full border-r-2 border-t-2 border-white/40" />
+                    <div className="absolute right-0 bottom-0 h-8 w-8 rounded-tl-full border-l-2 border-t-2 border-white/40" />
                   </div>
 
                   {/* Player tokens */}
@@ -1876,13 +1884,13 @@ export default function Overlay() {
                         className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
                         style={{ left: `${slot.left}%`, top: `${displayTop}%` }}
                       >
-                        <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border-2 border-white/60 bg-[#0d3f42] shadow-lg">
+                        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-2 border-white/70 bg-[#0d3f42] shadow-lg">
                           {playerPhoto
                             ? <img src={playerPhoto} alt={slot.player} className="h-full w-full object-cover" />
                             : <div className="text-lg font-black text-white">{num || "?"}</div>
                           }
                         </div>
-                        <p className="mt-0.5 text-[12px] font-black leading-none text-white drop-shadow">{num ? `${num}.` : ""} {lastName}</p>
+                        <p className="mt-0.5 rounded bg-black/28 px-1.5 py-[2px] text-[12px] font-black leading-none text-white drop-shadow">{num ? `${num}.` : ""} {lastName}</p>
                       </div>
                     );
                   })}
@@ -1891,7 +1899,7 @@ export default function Overlay() {
                 {/* Bench list */}
                 <div className="border-l border-white/20 bg-black/20 px-4 py-4">
                   <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-white/80">Vaihtopelaajat</p>
-                  <div className="space-y-1.5">
+                  <div className="max-h-full space-y-1.5 overflow-y-auto pr-1">
                     {visibleRosterPanel.bench.length === 0 ? (
                       <p className="text-sm text-white/70">Ei vaihtopelaajia.</p>
                     ) : (
@@ -1926,7 +1934,7 @@ export default function Overlay() {
       {/* ── LEAGUE LOGO ── */}
       {leagueLogo && (
         <div className="absolute top-4 left-4">
-          <img src={leagueLogo} alt="" className="h-10 object-contain" />
+          <img src={leagueLogo} alt="" className="h-14 object-contain" />
         </div>
       )}
 
