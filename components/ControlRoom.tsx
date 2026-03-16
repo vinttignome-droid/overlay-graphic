@@ -53,6 +53,24 @@ type FootballRotation = {
   assignments: Record<string, string>;
 };
 
+type PlayerPosition = "Maalivahti" | "Puolustaja" | "Keskikenttä" | "Hyökkääjä";
+
+type Player = {
+  firstName: string;
+  lastName: string;
+  team: string;
+  number: string;
+  photo: string;
+  position: PlayerPosition | "";
+};
+
+const PLAYER_POSITION_OPTIONS: PlayerPosition[] = ["Maalivahti", "Puolustaja", "Keskikenttä", "Hyökkääjä"];
+
+const normalizePlayerPosition = (value: unknown): PlayerPosition | "" => {
+  if (typeof value !== "string") return "";
+  return PLAYER_POSITION_OPTIONS.includes(value as PlayerPosition) ? (value as PlayerPosition) : "";
+};
+
 const MATCH_STATS_OPTIONS: Array<{ key: string; label: string }> = [
   { key: "goals", label: "Maalit" },
   { key: "saves", label: "Torjunnat" },
@@ -239,7 +257,7 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
   const [newTeam, setNewTeam] = useState("");
   const [teamLeagues, setTeamLeagues] = useState<string[]>([]);
   const [newTeamLogo, setNewTeamLogo] = useState("");
-  const [players, setPlayers] = useState<Array<{firstName:string;lastName:string;team:string;number:string;photo:string}>>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
   const [playerSearch, setPlayerSearch] = useState("");
   const [teamFilter, setTeamFilter] = useState("");
   const [playerModalOpen, setPlayerModalOpen] = useState(false);
@@ -248,6 +266,7 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
   const [playerTeam, setPlayerTeam] = useState("");
   const [newPlayerNumber, setNewPlayerNumber] = useState("");
   const [newPlayerPhoto, setNewPlayerPhoto] = useState("");
+  const [newPlayerPosition, setNewPlayerPosition] = useState<PlayerPosition | "">("");
   const [editingPlayerIndex, setEditingPlayerIndex] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"players" | "teams" | "leagues" | "matches" | "overlays">("players");
   const [teamSearch, setTeamSearch] = useState("");
@@ -559,7 +578,18 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
       .filter((match) => match.homeTeam && match.awayTeam);
 
     setMatches(storedMatches);
-    setPlayers(parseFromStorage<{firstName:string;lastName:string;team:string;number:string;photo:string}>(playersStorageKey));
+    const storedPlayers = parseFromStorage<Partial<Player>>(playersStorageKey)
+      .map((player) => ({
+        firstName: typeof player.firstName === "string" ? player.firstName : "",
+        lastName: typeof player.lastName === "string" ? player.lastName : "",
+        team: typeof player.team === "string" ? player.team : "",
+        number: typeof player.number === "string" ? player.number : "",
+        photo: typeof player.photo === "string" ? player.photo : "",
+        position: normalizePlayerPosition(player.position),
+      }))
+      .filter((player) => player.firstName || player.lastName);
+
+    setPlayers(storedPlayers);
 
     const rawLineups = typeof window !== "undefined" ? localStorage.getItem(lineupsStorageKey) : null;
     if (rawLineups) {
@@ -840,19 +870,27 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
 
   const addPlayer = () => {
     if(!newPlayerFirstName.trim() || !newPlayerLastName.trim()) return;
+    const playerPayload: Player = {
+      firstName: newPlayerFirstName.trim(),
+      lastName: newPlayerLastName.trim(),
+      team: playerTeam,
+      number: newPlayerNumber,
+      photo: newPlayerPhoto,
+      position: newPlayerPosition,
+    };
+
     if (editingPlayerIndex !== null) {
-      // Update existing
-      setPlayers(prev => prev.map((p, i) => i === editingPlayerIndex ? {firstName:newPlayerFirstName.trim(),lastName:newPlayerLastName.trim(),team:playerTeam,number:newPlayerNumber,photo:newPlayerPhoto} : p));
+      setPlayers(prev => prev.map((p, i) => i === editingPlayerIndex ? playerPayload : p));
       setEditingPlayerIndex(null);
     } else {
-      // Add new
-      setPlayers(prev=>[...prev,{firstName:newPlayerFirstName.trim(),lastName:newPlayerLastName.trim(),team:playerTeam,number:newPlayerNumber,photo:newPlayerPhoto}]);
+      setPlayers(prev=>[...prev, playerPayload]);
     }
     setNewPlayerFirstName("");
     setNewPlayerLastName("");
     setPlayerTeam("");
     setNewPlayerNumber("");
     setNewPlayerPhoto("");
+    setNewPlayerPosition("");
     setPlayerModalOpen(false);
   };
 
@@ -907,6 +945,7 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
     setPlayerTeam("");
     setNewPlayerNumber("");
     setNewPlayerPhoto("");
+    setNewPlayerPosition("");
     setPlayerModalOpen(true);
   };
 
@@ -920,6 +959,7 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
     setPlayerTeam(player.team);
     setNewPlayerNumber(player.number);
     setNewPlayerPhoto(player.photo);
+    setNewPlayerPosition(player.position || "");
     setEditingPlayerIndex(index);
     setPlayerModalOpen(true);
   };
@@ -940,6 +980,7 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
     setPlayerTeam("");
     setNewPlayerNumber("");
     setNewPlayerPhoto("");
+    setNewPlayerPosition("");
     setPlayerModalOpen(false);
 
     setEditingTeamIndex(null);
@@ -1009,9 +1050,10 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
       team: findHeader("team", "joukkue"),
       number: findHeader("number", "pelinumero"),
       photo: findHeader("photo", "kuva"),
+      position: findHeader("position", "pelipaikka"),
     };
 
-    const importedPlayers = lines.slice(1).map((line) => {
+    const importedPlayers: Player[] = lines.slice(1).map((line) => {
       const cols = splitRow(line, delimiter);
       const legacyName = idx.legacyName >= 0 ? cols[idx.legacyName] ?? "" : "";
       const [legacyFirstName = "", ...legacyLastParts] = legacyName.split(" ").filter(Boolean);
@@ -1020,12 +1062,16 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
       const firstName = idx.firstName >= 0 ? cols[idx.firstName] ?? "" : legacyFirstName;
       const lastName = idx.lastName >= 0 ? cols[idx.lastName] ?? "" : legacyLastName;
 
+      const parsedPosition = idx.position >= 0 ? cols[idx.position] ?? "" : "";
+      const normalizedPosition = normalizePlayerPosition(parsedPosition);
+
       return {
         firstName,
         lastName,
         team: idx.team >= 0 ? cols[idx.team] ?? "" : fallbackTeam,
         number: idx.number >= 0 ? cols[idx.number] ?? "" : "",
         photo: idx.photo >= 0 ? cols[idx.photo] ?? "" : "",
+        position: normalizedPosition,
       };
     });
 
@@ -1071,7 +1117,12 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
 
     return players.filter((p) => {
       const matchesSearch =
-        !q || p.firstName.toLowerCase().includes(q) || p.lastName.toLowerCase().includes(q) || p.team.toLowerCase().includes(q) || p.number.includes(q);
+        !q
+        || p.firstName.toLowerCase().includes(q)
+        || p.lastName.toLowerCase().includes(q)
+        || p.team.toLowerCase().includes(q)
+        || p.number.includes(q)
+        || p.position.toLowerCase().includes(q);
       const matchesTeam = !teamQ || p.team === teamQ;
       return matchesSearch && matchesTeam;
     });
@@ -1478,6 +1529,9 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
                         <div>
                           <p className="font-semibold text-gray-900">{p.firstName} {p.lastName}</p>
                           <p className="text-sm text-gray-500">#{p.number} • {p.team}</p>
+                          {p.position ? (
+                            <p className="mt-0.5 text-xs font-medium text-indigo-600">{p.position}</p>
+                          ) : null}
                         </div>
                       </div>
                       <div className="mt-5 flex flex-wrap gap-2">
@@ -2665,6 +2719,18 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
                 value={newPlayerNumber}
                 onChange={(e) => setNewPlayerNumber(e.target.value)}
               />
+              <select
+                className="bg-white border border-gray-300 p-3 rounded-lg"
+                value={newPlayerPosition}
+                onChange={(e) => setNewPlayerPosition(e.target.value as PlayerPosition | "")}
+              >
+                <option value="">Valitse pelipaikka</option>
+                {PLAYER_POSITION_OPTIONS.map((positionOption) => (
+                  <option key={positionOption} value={positionOption}>
+                    {positionOption}
+                  </option>
+                ))}
+              </select>
               <select
                 className="col-span-full bg-white border border-gray-300 p-3 rounded-lg"
                 value={playerTeam}

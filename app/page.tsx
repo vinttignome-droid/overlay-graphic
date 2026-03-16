@@ -689,73 +689,16 @@ export default function HomePage() {
         transition={{ duration: 0.6, delay: 0.3 }}
       >
           {!isStatsView ? (
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <motion.h2
-                className="text-4xl font-bold text-gray-800"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.45 }}
-              >
-                Kilpailut
-              </motion.h2>
-
-              {loggedIn ? (
-                <div className="flex items-center gap-3">
-                  <Input
-                    placeholder="Search competitions"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="min-w-[240px]"
-                  />
-                  <Button onClick={() => setCreateOpen(true)} className="bg-red-600 hover:bg-red-700">Create a competition</Button>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-
-          {!isStatsView ? (
-            <motion.div 
-              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"
+            <motion.div
+              className="rounded-3xl border border-gray-200 bg-white/80 p-8 shadow-sm"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
+              transition={{ delay: 0.45 }}
             >
-              {filteredCompetitions.map((c, i) => (
-                <motion.div
-                  key={i}
-                  className="relative bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300"
-                  whileHover={{ y: -4 }}
-                >
-                  <div className="h-32 bg-gray-100 flex items-center justify-center">
-                    <img src={c.logo} alt={c.name} className="max-h-20 max-w-full" />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-800 text-center">{c.name}</h3>
-                  </div>
-                  {loggedIn ? (
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      className="absolute top-3 right-3"
-                      onClick={() => removeCompetition(i)}
-                    >
-                      ×
-                    </Button>
-                  ) : null}
-                </motion.div>
-              ))}
-
-              {loggedIn ? (
-                <motion.button
-                  className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-2xl p-6 text-gray-500 hover:border-gray-400 hover:text-gray-700"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setCreateOpen(true)}
-                >
-                  <div className="text-4xl">+</div>
-                  <div className="text-sm font-semibold">Create a competition</div>
-                </motion.button>
-              ) : null}
+              <h2 className="text-3xl font-bold text-gray-800">Etusivu</h2>
+              <p className="mt-3 text-gray-600">
+                Kilpailut-osio on poistettu etusivulta. Avaa tilastot ylävalikon kautta tai kirjaudu hallintaan jatkaaksesi.
+              </p>
             </motion.div>
           ) : (
             <motion.div
