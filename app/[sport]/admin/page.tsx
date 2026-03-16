@@ -1,10 +1,12 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import ControlRoom from "@/components/ControlRoom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+const AUTH_KEY = "ligr:admin-auth";
 
 export default function SportAdminPage() {
   const params = useParams<{ sport?: string | string[] }>();
@@ -14,16 +16,38 @@ export default function SportAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState("");
 
+  // Restore session from localStorage on page load/refresh
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(AUTH_KEY);
+      if (stored === "true") {
+        setIsAuthenticated(true);
+      }
+    }
+  }, []);
+
   const handleLogin = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (username === "Karpot-TV" && password === "admin") {
       setIsAuthenticated(true);
       setError("");
+      setUsername("");
+      setPassword("");
+      if (typeof window !== "undefined") {
+        localStorage.setItem(AUTH_KEY, "true");
+      }
       return;
     }
 
     setError("Virheellinen käyttäjätunnus tai salasana.");
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(AUTH_KEY);
+    }
   };
 
   if (!isAuthenticated) {
@@ -57,5 +81,6 @@ export default function SportAdminPage() {
     );
   }
 
-  return <ControlRoom sport={sport} />;
+  return <ControlRoom sport={sport} onLogout={handleLogout} />;
+}
 }

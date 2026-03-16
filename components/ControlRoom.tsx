@@ -10,6 +10,7 @@ import { isServerSyncDone, SYNC_DONE_EVENT } from "@/lib/serverSyncSignal";
 
 interface ControlRoomProps {
   sport: string;
+  onLogout?: () => void;
 }
 
 type League = {
@@ -211,7 +212,7 @@ const toThemeToken = (value: string) =>
 
 const createThemeMatchId = (homeTeam: string, awayTeam: string) => `${toThemeToken(homeTeam)}-vs-${toThemeToken(awayTeam)}`;
 
-export default function ControlRoom({ sport }: ControlRoomProps) {
+export default function ControlRoom({ sport, onLogout }: ControlRoomProps) {
   const router = useRouter();
   const getPlayerPhoto = (photo: string) => photo || DEFAULT_PLAYER_SILHOUETTE;
   const normalizedSport = (sport || "").trim().toLowerCase();
@@ -1557,8 +1558,18 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
+            className="flex items-center gap-3"
           >
             <Button variant="outline" className="hover:bg-blue-50">Asetukset</Button>
+            {onLogout && (
+              <Button
+                variant="outline"
+                className="hover:bg-red-50 text-red-600 border-red-200"
+                onClick={onLogout}
+              >
+                Kirjaudu ulos
+              </Button>
+            )}
           </motion.div>
         </div>
       </header>

@@ -1838,8 +1838,8 @@ export default function Overlay() {
           return aTop - bTop;
         });
         return (
-          <div className="absolute inset-0 z-30 flex items-start justify-center pt-8 px-4">
-            <div className="flex h-[85%] max-h-[700px] w-full max-w-[1200px] flex-col overflow-hidden border border-white/20 bg-[#066d73]/95 shadow-2xl">
+          <div className="absolute inset-0 z-30 flex items-start justify-center pt-8 px-4 pr-10">
+            <div className="flex h-[95%] max-h-[890px] w-full max-w-[1200px] flex-col overflow-hidden border border-white/20 bg-[#066d73]/95 shadow-2xl">
               {/* Header bar */}
               <div className="flex h-[62px] shrink-0 items-center gap-3 border-b border-white/20 px-5" style={{ background: "rgba(0,0,0,0.42)" }}>
                 {visibleRosterLogo
