@@ -168,6 +168,11 @@ const splitPlayerName = (name: string) => {
   };
 };
 
+const isPlaceholderTeamName = (value: string) => {
+  const normalized = value.trim().toLowerCase();
+  return normalized === "home" || normalized === "away" || normalized === "koti" || normalized === "vieras";
+};
+
 export default function Livescore() {
   const searchParams = useSearchParams();
   const rawMatchId = (searchParams.get("match") || "").trim();
@@ -1058,13 +1063,27 @@ export default function Livescore() {
 
     const applyEngineMessage = (d: Record<string, unknown>) => {
       if (d.type === "score") {
-        setHomeTeam(typeof d.homeTeam === "string" ? d.homeTeam : "HOME");
-        setAwayTeam(typeof d.awayTeam === "string" ? d.awayTeam : "AWAY");
+        const incomingSource = typeof d.source === "string" ? d.source : "";
+        const incomingHomeTeam = typeof d.homeTeam === "string" ? d.homeTeam : "HOME";
+        const incomingAwayTeam = typeof d.awayTeam === "string" ? d.awayTeam : "AWAY";
+
+        setHomeTeam((prev) => {
+          if (incomingSource === "control-room" && isPlaceholderTeamName(incomingHomeTeam) && !isPlaceholderTeamName(prev)) {
+            return prev;
+          }
+          return incomingHomeTeam;
+        });
+        setAwayTeam((prev) => {
+          if (incomingSource === "control-room" && isPlaceholderTeamName(incomingAwayTeam) && !isPlaceholderTeamName(prev)) {
+            return prev;
+          }
+          return incomingAwayTeam;
+        });
         setHomeScore(typeof d.homeScore === "number" ? d.homeScore : 0);
         setAwayScore(typeof d.awayScore === "number" ? d.awayScore : 0);
         setPeriod(typeof d.period === "string" ? d.period : "1");
         // Ignore ControlRoom clock heartbeat here so manual Livescore clock edits are not overwritten.
-        if (d.source !== "control-room") {
+        if (incomingSource !== "control-room") {
           setClock(typeof d.clock === "string" ? d.clock : "00:00");
           if (typeof d.clockRunning === "boolean") {
             setClockRunning(d.clockRunning);

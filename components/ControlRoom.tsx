@@ -84,6 +84,11 @@ const normalizePlayerPosition = (value: unknown): PlayerPosition | "" => {
   return PLAYER_POSITION_OPTIONS.includes(value as PlayerPosition) ? (value as PlayerPosition) : "";
 };
 
+const isPlaceholderTeamName = (value: string) => {
+  const normalized = value.trim().toLowerCase();
+  return normalized === "home" || normalized === "away" || normalized === "koti" || normalized === "vieras";
+};
+
 const MATCH_STATS_OPTIONS: Array<{ key: string; label: string }> = [
   { key: "goals", label: "Maalit" },
   { key: "saves", label: "Torjunnat" },
@@ -223,6 +228,7 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
   const [awayScore, setAwayScore] = useState(0);
   const [period, setPeriod] = useState("1");
   const [clock, setClock] = useState("00:00");
+  const shouldBroadcastScoreState = !isPlaceholderTeamName(homeTeam) || !isPlaceholderTeamName(awayTeam);
 
   /* ============= clock ============ */
   const [clockRunning, setClockRunning] = useState(false);
@@ -438,6 +444,30 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
         const nm = String(Math.floor(total / 60)).padStart(2, "0");
         const ns = String(total % 60).padStart(2, "0");
         const newTime = `${nm}:${ns}`;
+        if (shouldBroadcastScoreState) {
+          relayEngineMessage({
+            type: "score",
+            source: "control-room",
+            homeTeam,
+            awayTeam,
+            homeScore,
+            awayScore,
+            period,
+            clock: newTime,
+            clockRunning: true,
+          });
+        }
+        return newTime;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [clockRunning, externalClockActive, homeTeam, awayTeam, homeScore, awayScore, period, shouldBroadcastScoreState]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const heartbeat = window.setInterval(() => {
+      if (shouldBroadcastScoreState) {
         relayEngineMessage({
           type: "score",
           source: "control-room",
@@ -446,30 +476,10 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
           homeScore,
           awayScore,
           period,
-          clock: newTime,
-          clockRunning: true,
+          clock,
+          clockRunning,
         });
-        return newTime;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [clockRunning, externalClockActive, homeTeam, awayTeam, homeScore, awayScore, period]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const heartbeat = window.setInterval(() => {
-      relayEngineMessage({
-        type: "score",
-        source: "control-room",
-        homeTeam,
-        awayTeam,
-        homeScore,
-        awayScore,
-        period,
-        clock,
-        clockRunning,
-      });
+      }
       relayEngineMessage({ type: "scene", scene });
       relayEngineMessage({ type: "overlayStyle", style: activeOverlayStyle });
       relayEngineMessage({
@@ -482,7 +492,7 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
     }, 1500);
 
     return () => window.clearInterval(heartbeat);
-  }, [activeOverlayStyle, awayLogo, awayScore, awayTeam, clock, clockRunning, homeLogo, homeScore, homeTeam, leagueLogo, period, scene, sponsorLogo]);
+  }, [activeOverlayStyle, awayLogo, awayScore, awayTeam, clock, clockRunning, homeLogo, homeScore, homeTeam, leagueLogo, period, scene, shouldBroadcastScoreState, sponsorLogo]);
 
   useEffect(() => {
     setHasLoadedStorage(false);
@@ -738,6 +748,7 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
 
   /* ============= actions ============= */
   const updateScore = () => {
+    if (!shouldBroadcastScoreState) return;
     relayEngineMessage({
       type: "score",
       source: "control-room",
