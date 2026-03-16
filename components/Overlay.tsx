@@ -1873,24 +1873,34 @@ export default function Overlay() {
                     <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[8px] border-2 border-white/40">
                       <div className="absolute inset-0 bg-[repeating-linear-gradient(180deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_34px,rgba(0,0,0,0.06)_34px,rgba(0,0,0,0.06)_68px)]" />
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.09)_0%,rgba(255,255,255,0)_55%)]" />
-                      <div className="absolute left-0 right-0 top-1/2 h-[2px] -translate-y-px bg-white/40" />
-                      <svg className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" width="124" height="124" viewBox="0 0 124 124">
-                        <circle cx="62" cy="62" r="56" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="2" />
+                      <svg
+                        className="absolute inset-0 h-full w-full"
+                        viewBox="0 0 1000 1400"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
+                      >
+                        <g fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="4">
+                          <rect x="22" y="22" width="956" height="1356" />
+                          <line x1="22" y1="700" x2="978" y2="700" />
+                          <circle cx="500" cy="700" r="108" />
+
+                          <rect x="220" y="22" width="560" height="240" />
+                          <rect x="380" y="22" width="240" height="96" />
+
+                          <rect x="220" y="1138" width="560" height="240" />
+                          <rect x="380" y="1282" width="240" height="96" />
+
+                          <path d="M 22 22 A 28 28 0 0 1 50 50" />
+                          <path d="M 978 22 A 28 28 0 0 0 950 50" />
+                          <path d="M 22 1378 A 28 28 0 0 0 50 1350" />
+                          <path d="M 978 1378 A 28 28 0 0 1 950 1350" />
+                        </g>
+                        <g fill="rgba(255,255,255,0.65)">
+                          <circle cx="500" cy="700" r="6" />
+                          <circle cx="500" cy="192" r="6" />
+                          <circle cx="500" cy="1208" r="6" />
+                        </g>
                       </svg>
-                      <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/60" />
-
-                      <div className="absolute left-1/2 top-0 h-[20%] w-[44%] -translate-x-1/2 border-2 border-t-0 border-white/40" />
-                      <div className="absolute left-1/2 top-0 h-[9%] w-[18%] -translate-x-1/2 border-2 border-t-0 border-white/40" />
-                      <div className="absolute left-1/2 top-[12%] h-2 w-2 -translate-x-1/2 rounded-full bg-white/60" />
-
-                      <div className="absolute left-1/2 bottom-0 h-[20%] w-[44%] -translate-x-1/2 border-2 border-b-0 border-white/40" />
-                      <div className="absolute left-1/2 bottom-0 h-[9%] w-[18%] -translate-x-1/2 border-2 border-b-0 border-white/40" />
-                      <div className="absolute left-1/2 bottom-[12%] h-2 w-2 -translate-x-1/2 rounded-full bg-white/60" />
-
-                      <div className="absolute left-0 top-0 h-8 w-8 rounded-br-full border-b-2 border-r-2 border-white/40" />
-                      <div className="absolute right-0 top-0 h-8 w-8 rounded-bl-full border-b-2 border-l-2 border-white/40" />
-                      <div className="absolute bottom-0 left-0 h-8 w-8 rounded-tr-full border-r-2 border-t-2 border-white/40" />
-                      <div className="absolute bottom-0 right-0 h-8 w-8 rounded-tl-full border-l-2 border-t-2 border-white/40" />
                     </div>
 
                     {/* Player tokens */}
