@@ -89,9 +89,21 @@ export default function HomePage() {
       setLoggedIn(true);
       setIsAdmin(true);
       setAdminOpen(false);
+      setEmail("");
+      setPassword("");
       if (typeof window !== "undefined") {
         localStorage.setItem("isAdmin", "true");
       }
+    }
+  };
+
+  const logout = () => {
+    setLoggedIn(false);
+    setIsAdmin(false);
+    setEmail("");
+    setPassword("");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("isAdmin");
     }
   };
 
@@ -652,6 +664,29 @@ export default function HomePage() {
           >
             Karpot‑TV Graphics
           </motion.h1>
+          <div className="flex items-center gap-4">
+            {isAdmin && (
+              <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
+                Kirjautue {email}
+              </span>
+            )}
+            {isAdmin ? (
+              <Button 
+                onClick={logout}
+                variant="outline"
+                className="hover:bg-red-50"
+              >
+                Kirjaudu ulos
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => setAdminOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Kirjaudu
+              </Button>
+            )}
+          </div>
         </div>
       </header>
 
