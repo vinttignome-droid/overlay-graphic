@@ -1487,51 +1487,51 @@ export default function Overlay() {
                     boxShadow: "0 20px 50px rgba(0,0,0,0.45)",
                   }}
                 >
-                  <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-6 px-8 py-6">
-                    <div className="flex min-w-0 items-center gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 sm:gap-6 px-4 sm:px-8 py-4 sm:py-6">
+                    <div className="flex min-w-0 items-center gap-2 sm:gap-4">
                       {homeLogo ? (
-                        <img src={homeLogo} alt={homeTeam} className="h-20 w-20 rounded-full border border-white/25 bg-white/10 object-contain p-1" />
+                        <img src={homeLogo} alt={homeTeam} className="h-14 w-14 sm:h-20 sm:w-20 rounded-full border border-white/25 bg-white/10 object-contain p-1" />
                       ) : (
-                        <div className="flex h-20 w-20 items-center justify-center rounded-full border border-white/25 bg-white/10 text-3xl font-black text-white">{homeTeam.slice(0, 1)}</div>
+                        <div className="flex h-14 w-14 sm:h-20 sm:w-20 items-center justify-center rounded-full border border-white/25 bg-white/10 text-2xl sm:text-3xl font-black text-white">{homeTeam.slice(0, 1)}</div>
                       )}
                       <div className="min-w-0">
-                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100/75">Koti</p>
-                        <p className="truncate text-[42px] font-black uppercase leading-none text-white">{homeTeam}</p>
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100/75">Koti</p>
+                        <p className="truncate text-xl sm:text-3xl md:text-[42px] font-black uppercase leading-none text-white">{homeTeam}</p>
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="rounded-full border border-white/35 bg-cyan-300/20 px-6 py-1 text-sm font-black uppercase tracking-[0.22em] text-cyan-100">
+                    <div className="flex shrink-0 flex-col items-center gap-2">
+                      <div className="rounded-full border border-white/35 bg-cyan-300/20 px-3 sm:px-6 py-1 text-[10px] sm:text-sm font-black uppercase tracking-[0.22em] text-cyan-100">
                         {period}. jakso
                       </div>
-                      <div className="rounded-[18px] border border-white/20 px-7 py-2 text-[56px] font-black leading-none text-[#083a3f]" style={{ background: "linear-gradient(180deg, #ecfffd 0%, #c8f4ec 100%)" }}>
+                      <div className="rounded-[18px] border border-white/20 px-3 sm:px-7 py-1 sm:py-2 text-2xl sm:text-4xl md:text-[56px] font-black leading-none text-[#083a3f]" style={{ background: "linear-gradient(180deg, #ecfffd 0%, #c8f4ec 100%)" }}>
                         {homeScore} - {awayScore}
                       </div>
                     </div>
 
-                    <div className="flex min-w-0 items-center justify-end gap-4">
+                    <div className="flex min-w-0 items-center justify-end gap-2 sm:gap-4">
                       <div className="min-w-0 text-right">
-                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100/75">Vieras</p>
-                        <p className="truncate text-[42px] font-black uppercase leading-none text-white">{awayTeam}</p>
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100/75">Vieras</p>
+                        <p className="truncate text-xl sm:text-3xl md:text-[42px] font-black uppercase leading-none text-white">{awayTeam}</p>
                       </div>
                       {awayLogo ? (
-                        <img src={awayLogo} alt={awayTeam} className="h-20 w-20 rounded-full border border-white/25 bg-white/10 object-contain p-1" />
+                        <img src={awayLogo} alt={awayTeam} className="h-14 w-14 sm:h-20 sm:w-20 rounded-full border border-white/25 bg-white/10 object-contain p-1" />
                       ) : (
-                        <div className="flex h-20 w-20 items-center justify-center rounded-full border border-white/25 bg-white/10 text-3xl font-black text-white">{awayTeam.slice(0, 1)}</div>
+                        <div className="flex h-14 w-14 sm:h-20 sm:w-20 items-center justify-center rounded-full border border-white/25 bg-white/10 text-2xl sm:text-3xl font-black text-white">{awayTeam.slice(0, 1)}</div>
                       )}
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-[1fr_auto_1fr] items-center border-t border-white/15 px-8 py-3">
-                    <p className="text-lg font-semibold uppercase tracking-[0.12em] text-cyan-100/80">
+                  <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-center border-t border-white/15 px-4 sm:px-8 py-2 sm:py-3 gap-1 sm:gap-0">
+                    <p className="text-[10px] sm:text-lg font-semibold uppercase tracking-[0.12em] text-cyan-100/80 truncate">
                       {kickoffTimeLabel ? `${kickoffDateLabel}  ${kickoffTimeLabel}` : "Live"}
                     </p>
-                    <p className="px-4 text-center text-[30px] font-black uppercase tracking-[0.2em] text-cyan-50">{aboutToStartText}</p>
-                    <p className="text-right text-base font-semibold text-cyan-100/90">
+                    <p className="px-2 sm:px-4 text-center text-sm sm:text-xl md:text-[30px] font-black uppercase tracking-[0.2em] text-cyan-50">{aboutToStartText}</p>
+                    <p className="text-right text-[10px] sm:text-base font-semibold text-cyan-100/90 truncate">
                       {venue ? `Stadium: ${venue}` : "Stadium: -"}
                     </p>
                   </div>
-                  <div className="border-t border-white/10 px-8 py-2 text-center text-base font-semibold text-cyan-50/95">
+                  <div className="border-t border-white/10 px-4 sm:px-8 py-2 text-center text-[10px] sm:text-xs md:text-base font-semibold text-cyan-50/95 overflow-x-auto">
                     {officialsLine}
                   </div>
                 </div>
@@ -1838,8 +1838,8 @@ export default function Overlay() {
           return aTop - bTop;
         });
         return (
-          <div className="absolute inset-0 z-30 flex items-start justify-center pt-12">
-            <div className="flex h-[78%] w-[90%] flex-col overflow-hidden border border-white/20 bg-[#066d73]/95 shadow-2xl">
+          <div className="absolute inset-0 z-30 flex items-start justify-center pt-8 px-4">
+            <div className="flex h-[85%] max-h-[700px] w-full max-w-[1200px] flex-col overflow-hidden border border-white/20 bg-[#066d73]/95 shadow-2xl">
               {/* Header bar */}
               <div className="flex h-[62px] shrink-0 items-center gap-3 border-b border-white/20 px-5" style={{ background: "rgba(0,0,0,0.42)" }}>
                 {visibleRosterLogo
@@ -1855,7 +1855,7 @@ export default function Overlay() {
                 <p className="text-[13px] font-semibold tracking-wide text-white/95">Stadium: {venue || "-"}</p>
               </div>
 
-              <div className="grid flex-1 grid-cols-[250px_1fr_250px]">
+              <div className="grid flex-1 grid-cols-[minmax(180px,200px)_1fr_minmax(180px,200px)]">
                 {/* Starting XI list */}
                 <div className="border-r border-white/20 bg-black/20 px-4 py-4">
                   <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-white/80">Avauskokoonpano</p>
