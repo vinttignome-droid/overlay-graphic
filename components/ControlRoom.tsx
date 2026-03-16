@@ -1539,9 +1539,9 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
         </div>
       </header>
 
-      <section className="max-w-7xl mx-auto px-6 py-12 space-y-12">
+      <section className="max-w-7xl mx-auto px-6 py-12 space-y-6 lg:space-y-12">
         <motion.div 
-          className="grid lg:grid-cols-[240px_1fr] gap-8"
+          className="flex flex-col gap-6 lg:gap-8 lg:grid lg:grid-cols-[240px_1fr]"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
@@ -1585,10 +1585,10 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
                   value={playerSearch}
                   onChange={(e) => setPlayerSearch(e.target.value)}
                   placeholder="Etsi pelaajia..."
-                  className="min-w-[240px]"
+                  className="w-full sm:min-w-[240px]"
                 />
                 <select
-                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
+                  className="w-full sm:auto rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
                   value={teamFilter}
                   onChange={(e) => setTeamFilter(e.target.value)}
                 >
@@ -1601,12 +1601,12 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
                 </select>
                 <Button
                   variant="outline"
-                  className="hover:bg-gray-50"
+                  className="hover:bg-gray-50 w-full sm:w-auto"
                   onClick={() => importInputRef.current?.click()}
                 >
                   Tuo pelaajat
                 </Button>
-                <Button onClick={openPlayerModal} className="bg-purple-600 hover:bg-purple-700">
+                <Button onClick={openPlayerModal} className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto">
                   Lisää pelaaja
                 </Button>
               </div>
@@ -1886,16 +1886,16 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
                     <p className="mt-1 text-sm text-gray-600">Lisää, muokkaa ja seuraa joukkueita nopeasti.</p>
                   </div>
 
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center w-full sm:w-auto">
                     <Input
                       value={teamSearch}
                       onChange={(e) => setTeamSearch(e.target.value)}
                       placeholder="Etsi joukkueita..."
-                      className="min-w-[240px]"
+                      className="w-full sm:min-w-[240px]"
                     />
                     <Button
                       onClick={() => setTeamModalOpen(true)}
-                      className="bg-green-600 hover:bg-green-700"
+                      className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
                     >
                       Lisää joukkue
                     </Button>
@@ -2670,14 +2670,14 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
                     <p className="mt-1 text-sm text-gray-600">Lisää ja muokkaa sarjoja.</p>
                   </div>
 
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center w-full sm:w-auto">
                     <Input
                       value={leagueSearch}
                       onChange={(e) => setLeagueSearch(e.target.value)}
                       placeholder="Etsi sarjoja..."
-                      className="min-w-[240px]"
+                      className="w-full sm:min-w-[240px]"
                     />
-                    <Button onClick={addLeague} className="bg-blue-600 hover:bg-blue-700">
+                    <Button onClick={addLeague} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
                       Lisää sarja
                     </Button>
                   </div>
