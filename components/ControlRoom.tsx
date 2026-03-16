@@ -48,6 +48,19 @@ type Match = {
   collectedStats: string[];
 };
 
+type TeamBackgroundInfo = {
+  headCoach: string;
+  manager: string;
+  others: string;
+};
+
+type Team = {
+  name: string;
+  leagues: string[];
+  logo: string;
+  background: TeamBackgroundInfo;
+};
+
 type FootballRotation = {
   formation: string;
   assignments: Record<string, string>;
@@ -246,7 +259,7 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
   const [newLeaguePenaltiesEnabled, setNewLeaguePenaltiesEnabled] = useState(false);
   const [newLeagueGoldenGoalEnabled, setNewLeagueGoldenGoalEnabled] = useState(false);
   const [editingLeagueIndex, setEditingLeagueIndex] = useState<number | null>(null);
-  const [teams, setTeams] = useState<Array<{name:string;leagues:string[];logo:string}>>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [newMatchHomeTeam, setNewMatchHomeTeam] = useState("");
   const [newMatchAwayTeam, setNewMatchAwayTeam] = useState("");
@@ -257,6 +270,9 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
   const [newTeam, setNewTeam] = useState("");
   const [teamLeagues, setTeamLeagues] = useState<string[]>([]);
   const [newTeamLogo, setNewTeamLogo] = useState("");
+  const [newTeamHeadCoach, setNewTeamHeadCoach] = useState("");
+  const [newTeamManager, setNewTeamManager] = useState("");
+  const [newTeamOthers, setNewTeamOthers] = useState("");
   const [players, setPlayers] = useState<Player[]>([]);
   const [playerSearch, setPlayerSearch] = useState("");
   const [teamFilter, setTeamFilter] = useState("");
@@ -510,15 +526,44 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
       .filter((league) => league.name.trim());
 
     setLeagues(storedLeagues);
-    const storedTeams = parseFromStorage<{name:string;league?:string;leagues?:string[];logo:string}>(teamsStorageKey)
+    const storedTeams = parseFromStorage<{
+      name?: string;
+      league?: string;
+      leagues?: string[];
+      logo?: string;
+      headCoach?: string;
+      manager?: string;
+      others?: string;
+      background?: Partial<TeamBackgroundInfo>;
+    }>(teamsStorageKey)
       .map((team) => ({
-        name: team.name,
-        logo: team.logo,
+        name: typeof team.name === "string" ? team.name : "",
+        logo: typeof team.logo === "string" ? team.logo : "",
         leagues: Array.isArray(team.leagues)
           ? team.leagues.filter(Boolean)
           : team.league
             ? [team.league]
             : [],
+        background: {
+          headCoach:
+            typeof team.background?.headCoach === "string"
+              ? team.background.headCoach
+              : typeof team.headCoach === "string"
+                ? team.headCoach
+                : "",
+          manager:
+            typeof team.background?.manager === "string"
+              ? team.background.manager
+              : typeof team.manager === "string"
+                ? team.manager
+                : "",
+          others:
+            typeof team.background?.others === "string"
+              ? team.background.others
+              : typeof team.others === "string"
+                ? team.others
+                : "",
+        },
       }));
 
     setTeams(storedTeams);
@@ -795,21 +840,35 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
   };
   const addTeam = () => {
     if(!newTeam.trim()) return;
+    const teamPayload: Team = {
+      name: newTeam.trim(),
+      leagues: teamLeagues,
+      logo: newTeamLogo,
+      background: {
+        headCoach: newTeamHeadCoach.trim(),
+        manager: newTeamManager.trim(),
+        others: newTeamOthers.trim(),
+      },
+    };
+
     if (editingTeamIndex !== null) {
       setTeams((prev) =>
         prev.map((t, i) =>
           i === editingTeamIndex
-            ? { name: newTeam.trim(), leagues: teamLeagues, logo: newTeamLogo }
+            ? teamPayload
             : t
         )
       );
       setEditingTeamIndex(null);
     } else {
-      setTeams((prev) => [...prev, { name: newTeam.trim(), leagues: teamLeagues, logo: newTeamLogo }]);
+      setTeams((prev) => [...prev, teamPayload]);
     }
     setNewTeam("");
     setTeamLeagues([]);
     setNewTeamLogo("");
+    setNewTeamHeadCoach("");
+    setNewTeamManager("");
+    setNewTeamOthers("");
     setTeamModalOpen(false);
   };
 
@@ -969,6 +1028,9 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
     setNewTeam(team.name);
     setTeamLeagues(team.leagues);
     setNewTeamLogo(team.logo);
+    setNewTeamHeadCoach(team.background?.headCoach || "");
+    setNewTeamManager(team.background?.manager || "");
+    setNewTeamOthers(team.background?.others || "");
     setEditingTeamIndex(index);
     setTeamModalOpen(true);
   };
@@ -987,6 +1049,9 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
     setNewTeam("");
     setTeamLeagues([]);
     setNewTeamLogo("");
+    setNewTeamHeadCoach("");
+    setNewTeamManager("");
+    setNewTeamOthers("");
     setTeamModalOpen(false);
   };
 
@@ -1819,6 +1884,13 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
                               <div>
                                 <p className="font-semibold text-gray-900">{t.name}</p>
                                 <p className="text-sm text-gray-500">{t.leagues.length ? t.leagues.join(", ") : "Ei sarjaa"}</p>
+                                {(t.background.headCoach || t.background.manager || t.background.others) ? (
+                                  <p className="mt-1 text-xs text-gray-600">
+                                    {t.background.headCoach ? `Päävalmentaja: ${t.background.headCoach}` : ""}
+                                    {t.background.headCoach && t.background.manager ? " • " : ""}
+                                    {t.background.manager ? `Huoltaja: ${t.background.manager}` : ""}
+                                  </p>
+                                ) : null}
                               </div>
                             </div>
                             <div className="mt-4">
@@ -2797,6 +2869,24 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
                 placeholder="Joukkueen nimi"
                 value={newTeam}
                 onChange={(e) => setNewTeam(e.target.value)}
+              />
+              <Input
+                label="Päävalmentaja"
+                placeholder="Esim. Mikko Valmentaja"
+                value={newTeamHeadCoach}
+                onChange={(e) => setNewTeamHeadCoach(e.target.value)}
+              />
+              <Input
+                label="Huoltaja"
+                placeholder="Esim. Antti Huoltaja"
+                value={newTeamManager}
+                onChange={(e) => setNewTeamManager(e.target.value)}
+              />
+              <Input
+                label="Muut"
+                placeholder="Esim. Joukkueenjohtaja, fysioterapeutti"
+                value={newTeamOthers}
+                onChange={(e) => setNewTeamOthers(e.target.value)}
               />
               <div className="col-span-full rounded-lg border border-gray-300 bg-white p-3">
                 <p className="mb-2 text-sm font-medium text-gray-700">Sarjat</p>

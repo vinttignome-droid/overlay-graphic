@@ -16,6 +16,12 @@ type TeamLineup = {
   bench: string[];
 };
 
+type TeamBackgroundInfo = {
+  headCoach: string;
+  manager: string;
+  others: string;
+};
+
 type RotationRow = {
   role: string;
   player: string;
@@ -30,6 +36,7 @@ type RosterPanelPayload = {
   rows: RotationRow[];
   starting: string[];
   bench: string[];
+  background: TeamBackgroundInfo;
 };
 
 type HalftimeStatRow = {
@@ -220,6 +227,8 @@ export default function Livescore() {
   const [awayLineup, setAwayLineup] = useState<TeamLineup>({ starting: [], bench: [] });
   const [homeRotation, setHomeRotation] = useState<{ formation: string; rows: RotationRow[] }>({ formation: "", rows: [] });
   const [awayRotation, setAwayRotation] = useState<{ formation: string; rows: RotationRow[] }>({ formation: "", rows: [] });
+  const [homeTeamBackground, setHomeTeamBackground] = useState<TeamBackgroundInfo>({ headCoach: "", manager: "", others: "" });
+  const [awayTeamBackground, setAwayTeamBackground] = useState<TeamBackgroundInfo>({ headCoach: "", manager: "", others: "" });
   const [teamSetupReloadKey, setTeamSetupReloadKey] = useState(0);
   const [goalRecords, setGoalRecords] = useState<GoalRecord[]>([]);
   const [cardRecords, setCardRecords] = useState<CardRecord[]>([]);
@@ -285,6 +294,7 @@ export default function Livescore() {
     lineup: TeamLineup,
     rotation: { formation: string; rows: RotationRow[] },
     visible: boolean,
+    background: TeamBackgroundInfo,
     preferredMode: "rotation" | "lineup",
   ): RosterPanelPayload => {
     const hasRotation = rotation.rows.length > 0;
@@ -300,6 +310,7 @@ export default function Livescore() {
       rows: mode === "rotation" ? rotation.rows : [],
       starting: lineup.starting,
       bench: lineup.bench,
+      background,
     };
   };
   const getRosterOverlayPayload = () => {
@@ -307,8 +318,8 @@ export default function Livescore() {
       return {
         type: "teamRosterOverlay" as const,
         matchId,
-        home: buildRosterPanel(homeTeam, homeLineup, homeRotation, false, "lineup"),
-        away: buildRosterPanel(awayTeam, awayLineup, awayRotation, true, "rotation"),
+        home: buildRosterPanel(homeTeam, homeLineup, homeRotation, false, homeTeamBackground, "lineup"),
+        away: buildRosterPanel(awayTeam, awayLineup, awayRotation, true, awayTeamBackground, "rotation"),
       };
     }
 
@@ -316,16 +327,16 @@ export default function Livescore() {
       return {
         type: "teamRosterOverlay" as const,
         matchId,
-        home: buildRosterPanel(homeTeam, homeLineup, homeRotation, true, "rotation"),
-        away: buildRosterPanel(awayTeam, awayLineup, awayRotation, false, "lineup"),
+        home: buildRosterPanel(homeTeam, homeLineup, homeRotation, true, homeTeamBackground, "rotation"),
+        away: buildRosterPanel(awayTeam, awayLineup, awayRotation, false, awayTeamBackground, "lineup"),
       };
     }
 
     return {
       type: "teamRosterOverlay" as const,
       matchId,
-      home: buildRosterPanel(homeTeam, homeLineup, homeRotation, showHomeTeamRoster, showRotationView ? "rotation" : "lineup"),
-      away: buildRosterPanel(awayTeam, awayLineup, awayRotation, showAwayTeamRoster, showRotationView ? "rotation" : "lineup"),
+      home: buildRosterPanel(homeTeam, homeLineup, homeRotation, showHomeTeamRoster, homeTeamBackground, showRotationView ? "rotation" : "lineup"),
+      away: buildRosterPanel(awayTeam, awayLineup, awayRotation, showAwayTeamRoster, awayTeamBackground, showRotationView ? "rotation" : "lineup"),
     };
   };
 
@@ -334,11 +345,17 @@ export default function Livescore() {
   }, [
     awayLineup.bench,
     awayLineup.starting,
+    awayTeamBackground.headCoach,
+    awayTeamBackground.manager,
+    awayTeamBackground.others,
     awayRotation.formation,
     awayRotation.rows,
     awayTeam,
     homeLineup.bench,
     homeLineup.starting,
+    homeTeamBackground.headCoach,
+    homeTeamBackground.manager,
+    homeTeamBackground.others,
     homeRotation.formation,
     homeRotation.rows,
     homeTeam,
@@ -360,11 +377,17 @@ export default function Livescore() {
   }, [
     awayLineup.bench,
     awayLineup.starting,
+    awayTeamBackground.headCoach,
+    awayTeamBackground.manager,
+    awayTeamBackground.others,
     awayRotation.formation,
     awayRotation.rows,
     awayTeam,
     homeLineup.bench,
     homeLineup.starting,
+    homeTeamBackground.headCoach,
+    homeTeamBackground.manager,
+    homeTeamBackground.others,
     homeRotation.formation,
     homeRotation.rows,
     homeTeam,
@@ -853,6 +876,18 @@ export default function Livescore() {
     const toNames = (keys: string[], playerMap: Map<string, string>) =>
       keys.map((key) => playerMap.get(key) || fallbackNameFromPlayerKey(key)).filter(Boolean);
 
+    let homeBackgroundLoaded = false;
+    let awayBackgroundLoaded = false;
+
+    const normalizeBackground = (value: unknown): TeamBackgroundInfo => {
+      const parsed = (typeof value === "object" && value !== null) ? (value as Record<string, unknown>) : {};
+      return {
+        headCoach: typeof parsed.headCoach === "string" ? parsed.headCoach : "",
+        manager: typeof parsed.manager === "string" ? parsed.manager : "",
+        others: typeof parsed.others === "string" ? parsed.others : "",
+      };
+    };
+
     let homeLineupLoaded = false;
     let awayLineupLoaded = false;
     let homeRotationLoaded = false;
@@ -909,6 +944,36 @@ export default function Livescore() {
         if (homeLineupLoaded && awayLineupLoaded) break;
       } catch {
         // Ignore malformed localStorage payloads.
+      }
+    }
+
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i) || "";
+      if (!key.endsWith(":teams")) continue;
+
+      try {
+        const rawTeams = localStorage.getItem(key);
+        if (!rawTeams) continue;
+        const parsedTeams = JSON.parse(rawTeams) as Array<Record<string, unknown>>;
+        if (!Array.isArray(parsedTeams)) continue;
+
+        const homeTeamData = parsedTeams.find((team) => (team?.name as string) === homeTeam);
+        if (homeTeamData) {
+          const background = normalizeBackground(homeTeamData.background);
+          setHomeTeamBackground(background);
+          homeBackgroundLoaded = true;
+        }
+
+        const awayTeamData = parsedTeams.find((team) => (team?.name as string) === awayTeam);
+        if (awayTeamData) {
+          const background = normalizeBackground(awayTeamData.background);
+          setAwayTeamBackground(background);
+          awayBackgroundLoaded = true;
+        }
+
+        if (homeBackgroundLoaded && awayBackgroundLoaded) break;
+      } catch {
+        // Ignore malformed team payloads.
       }
     }
 
@@ -976,6 +1041,12 @@ export default function Livescore() {
     }
     if (!awayRotationLoaded) {
       setAwayRotation({ formation: "", rows: [] });
+    }
+    if (!homeBackgroundLoaded) {
+      setHomeTeamBackground({ headCoach: "", manager: "", others: "" });
+    }
+    if (!awayBackgroundLoaded) {
+      setAwayTeamBackground({ headCoach: "", manager: "", others: "" });
     }
   }, [awayTeam, homeTeam, teamSetupReloadKey]);
 

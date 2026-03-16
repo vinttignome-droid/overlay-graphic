@@ -50,6 +50,11 @@ type OverlayRosterPanel = {
   rows: Array<{ role: string; player: string }>;
   starting: string[];
   bench: string[];
+  background: {
+    headCoach: string;
+    manager: string;
+    others: string;
+  };
 };
 
 type OverlayHalftimeStatRow = {
@@ -385,6 +390,7 @@ export default function Overlay() {
     rows: [],
     starting: [],
     bench: [],
+    background: { headCoach: "", manager: "", others: "" },
   });
   const [awayRosterOverlay, setAwayRosterOverlay] = useState<OverlayRosterPanel>({
     visible: false,
@@ -394,6 +400,7 @@ export default function Overlay() {
     rows: [],
     starting: [],
     bench: [],
+    background: { headCoach: "", manager: "", others: "" },
   });
   const [playerPhotoByTeamAndName, setPlayerPhotoByTeamAndName] = useState<Record<string, string>>({});
   const lastRelayTsRef = useRef(0);
@@ -841,6 +848,17 @@ export default function Overlay() {
                 : [],
               starting: Array.isArray(panel.starting) ? panel.starting.filter((item): item is string => typeof item === "string") : [],
               bench: Array.isArray(panel.bench) ? panel.bench.filter((item): item is string => typeof item === "string") : [],
+              background: {
+                headCoach: typeof (panel.background as Record<string, unknown> | undefined)?.headCoach === "string"
+                  ? ((panel.background as Record<string, unknown>).headCoach as string)
+                  : "",
+                manager: typeof (panel.background as Record<string, unknown> | undefined)?.manager === "string"
+                  ? ((panel.background as Record<string, unknown>).manager as string)
+                  : "",
+                others: typeof (panel.background as Record<string, unknown> | undefined)?.others === "string"
+                  ? ((panel.background as Record<string, unknown>).others as string)
+                  : "",
+              },
             };
           };
 
@@ -1764,6 +1782,16 @@ export default function Overlay() {
               ))
             )}
           </div>
+          {(visibleRosterPanel.background.headCoach || visibleRosterPanel.background.manager || visibleRosterPanel.background.others) ? (
+            <div className="mt-4 rounded-lg border border-white/15 bg-black/20 p-3 text-sm">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/75">Taustat</p>
+              <div className="space-y-1 text-white/90">
+                {visibleRosterPanel.background.headCoach ? <p><span className="font-semibold text-white/75">Päävalmentaja:</span> {visibleRosterPanel.background.headCoach}</p> : null}
+                {visibleRosterPanel.background.manager ? <p><span className="font-semibold text-white/75">Huoltaja:</span> {visibleRosterPanel.background.manager}</p> : null}
+                {visibleRosterPanel.background.others ? <p><span className="font-semibold text-white/75">Muut:</span> {visibleRosterPanel.background.others}</p> : null}
+              </div>
+            </div>
+          ) : null}
         </div>
       )}
 
@@ -1867,6 +1895,16 @@ export default function Overlay() {
                       })
                     )}
                   </div>
+                  {(visibleRosterPanel.background.headCoach || visibleRosterPanel.background.manager || visibleRosterPanel.background.others) ? (
+                    <div className="mt-4 border-t border-white/15 pt-3 text-[13px] text-white/90">
+                      <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/75">Taustat</p>
+                      <div className="space-y-1">
+                        {visibleRosterPanel.background.headCoach ? <p><span className="font-semibold text-white/75">Päävalmentaja:</span> {visibleRosterPanel.background.headCoach}</p> : null}
+                        {visibleRosterPanel.background.manager ? <p><span className="font-semibold text-white/75">Huoltaja:</span> {visibleRosterPanel.background.manager}</p> : null}
+                        {visibleRosterPanel.background.others ? <p><span className="font-semibold text-white/75">Muut:</span> {visibleRosterPanel.background.others}</p> : null}
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>
