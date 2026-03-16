@@ -2241,13 +2241,23 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
 
                         <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
                           <p className="text-sm font-semibold text-gray-700">Kenttävisualisointi ({footballFormation.key})</p>
-                          <div className="mt-4 rounded-xl border border-emerald-300 bg-gradient-to-b from-emerald-500 to-emerald-700 p-3">
-                            <div className="relative mx-auto aspect-[3/4] w-full max-w-md overflow-hidden rounded-lg border-2 border-white/60">
+                          <div className="mt-4 rounded-xl border border-emerald-300 bg-gradient-to-b from-emerald-500 via-emerald-600 to-emerald-700 p-3 shadow-inner">
+                            <div className="relative mx-auto aspect-[3/4] w-full max-w-md overflow-hidden rounded-lg border-2 border-white/70 bg-gradient-to-b from-emerald-500 to-emerald-700">
+                              <div className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(180deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_22px,rgba(0,0,0,0.08)_22px,rgba(0,0,0,0.08)_44px)]" />
                               <div className="absolute inset-0">
                                 <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-white/60" />
                                 <div className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/60" />
+                                <div className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/70" />
                                 <div className="absolute left-1/2 top-0 h-16 w-44 -translate-x-1/2 border-2 border-white/60 border-t-0" />
+                                <div className="absolute left-1/2 top-0 h-8 w-20 -translate-x-1/2 border-2 border-white/60 border-t-0" />
+                                <div className="absolute left-1/2 top-[13%] h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-white/70" />
                                 <div className="absolute left-1/2 bottom-0 h-16 w-44 -translate-x-1/2 border-2 border-white/60 border-b-0" />
+                                <div className="absolute left-1/2 bottom-0 h-8 w-20 -translate-x-1/2 border-2 border-white/60 border-b-0" />
+                                <div className="absolute left-1/2 bottom-[13%] h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-white/70" />
+                                <div className="absolute left-0 top-0 h-6 w-6 rounded-br-full border-r-2 border-b-2 border-white/60" />
+                                <div className="absolute right-0 top-0 h-6 w-6 rounded-bl-full border-l-2 border-b-2 border-white/60" />
+                                <div className="absolute left-0 bottom-0 h-6 w-6 rounded-tr-full border-r-2 border-t-2 border-white/60" />
+                                <div className="absolute right-0 bottom-0 h-6 w-6 rounded-tl-full border-l-2 border-t-2 border-white/60" />
                               </div>
 
                               {(FOOTBALL_FORMATION_COORDS[footballFormation.key] || []).map((coord, index) => {

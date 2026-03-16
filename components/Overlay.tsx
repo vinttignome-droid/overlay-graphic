@@ -1251,9 +1251,7 @@ export default function Overlay() {
                 </p>
               ) : <div />}
               {venue ? (
-                <p className="text-[26px] font-semibold tracking-wide" style={{ color: streamPalette.textDim }}>Stadium: {venue}</p>
-              ) : leagueLogo ? (
-                <img src={leagueLogo} alt="" className="h-9 object-contain" />
+                <p className="text-[26px] font-semibold tracking-wide" style={{ color: streamPalette.text }}>Stadium: {venue}</p>
               ) : <div />}
             </div>
 
@@ -1262,7 +1260,15 @@ export default function Overlay() {
 
             {/* ── Main content ── */}
             <div className="flex flex-1 flex-col items-center justify-center gap-8">
+              {leagueLogo ? (
+                <img src={leagueLogo} alt="League" className="h-14 object-contain drop-shadow-lg" />
+              ) : null}
               <p className="text-[42px] font-semibold tracking-[0.06em]" style={{ color: streamPalette.textDim }}>Waiting for match</p>
+              {venue ? (
+                <p className="-mt-4 text-[26px] font-semibold tracking-[0.04em]" style={{ color: streamPalette.text }}>
+                  Stadium: {venue}
+                </p>
+              ) : null}
 
               <div className="flex w-full items-center justify-center gap-0">
                 {/* Home team */}
