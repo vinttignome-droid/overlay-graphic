@@ -1880,30 +1880,30 @@ export default function Overlay() {
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.09)_0%,rgba(255,255,255,0)_55%)]" />
                       <svg
                         className="absolute inset-0 h-full w-full"
-                        viewBox="0 0 1000 1400"
+                        viewBox="0 0 1000 1600"
                         preserveAspectRatio="none"
                         aria-hidden="true"
                       >
                         <g fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="4">
-                          <rect x="22" y="22" width="956" height="1356" />
-                          <line x1="22" y1="700" x2="978" y2="700" />
-                          <circle cx="500" cy="700" r="108" />
+                          <rect x="22" y="22" width="956" height="1556" />
+                          <line x1="22" y1="800" x2="978" y2="800" />
+                          <circle cx="500" cy="800" r="108" />
 
                           <rect x="220" y="22" width="560" height="240" />
                           <rect x="380" y="22" width="240" height="96" />
 
-                          <rect x="220" y="1138" width="560" height="240" />
-                          <rect x="380" y="1282" width="240" height="96" />
+                          <rect x="220" y="1338" width="560" height="240" />
+                          <rect x="380" y="1482" width="240" height="96" />
 
                           <path d="M 22 22 A 28 28 0 0 1 50 50" />
                           <path d="M 978 22 A 28 28 0 0 0 950 50" />
-                          <path d="M 22 1378 A 28 28 0 0 0 50 1350" />
-                          <path d="M 978 1378 A 28 28 0 0 1 950 1350" />
+                          <path d="M 22 1578 A 28 28 0 0 0 50 1550" />
+                          <path d="M 978 1578 A 28 28 0 0 1 950 1550" />
                         </g>
                         <g fill="rgba(255,255,255,0.65)">
-                          <circle cx="500" cy="700" r="6" />
-                          <circle cx="500" cy="192" r="6" />
-                          <circle cx="500" cy="1208" r="6" />
+                          <circle cx="500" cy="800" r="6" />
+                          <circle cx="500" cy="262" r="6" />
+                          <circle cx="500" cy="1338" r="6" />
                         </g>
                       </svg>
                     </div>
