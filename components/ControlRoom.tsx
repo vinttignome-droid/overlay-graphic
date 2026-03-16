@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import Sidebar from "@/components/Sidebar";
 import { motion } from "framer-motion";
 import { relayPublish } from "@/lib/realtimeRelay";
+import { isServerSyncDone, SYNC_DONE_EVENT } from "@/lib/serverSyncSignal";
 
 interface ControlRoomProps {
   sport: string;
@@ -313,6 +314,18 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
   const lineupsStorageKey = `ligr:${sport}:lineups`;
   const footballRotationsStorageKey = `ligr:${sport}:football-rotations`;
   const [hasLoadedStorage, setHasLoadedStorage] = useState(false);
+  const [syncReady, setSyncReady] = useState(() =>
+    typeof window !== "undefined" && isServerSyncDone()
+  );
+
+  // Wait for ServerStorageSync to finish loading server data into localStorage
+  // before ControlRoom reads from localStorage (prevents empty-data race condition).
+  useEffect(() => {
+    if (syncReady) return;
+    const handleSyncDone = () => setSyncReady(true);
+    window.addEventListener(SYNC_DONE_EVENT, handleSyncDone);
+    return () => window.removeEventListener(SYNC_DONE_EVENT, handleSyncDone);
+  }, [syncReady]);
 
   /* ============= realtime engine ============= */
   const relayEngineMessage = (payload: Record<string, unknown>) => {
@@ -495,8 +508,8 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
   }, [activeOverlayStyle, awayLogo, awayScore, awayTeam, clock, clockRunning, homeLogo, homeScore, homeTeam, leagueLogo, period, scene, shouldBroadcastScoreState, sponsorLogo]);
 
   useEffect(() => {
+    if (!syncReady || typeof window === "undefined") return;
     setHasLoadedStorage(false);
-    if (typeof window === "undefined") return;
 
     const parseFromStorage = <T,>(key: string): T[] => {
       try {
@@ -677,7 +690,7 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
       setFootballRotationsByTeam({});
     }
     setHasLoadedStorage(true);
-  }, [leaguesStorageKey, teamsStorageKey, matchesStorageKey, playersStorageKey, lineupsStorageKey, footballRotationsStorageKey]);
+  }, [syncReady, leaguesStorageKey, teamsStorageKey, matchesStorageKey, playersStorageKey, lineupsStorageKey, footballRotationsStorageKey]);
 
   useEffect(() => {
     if (!hasLoadedStorage || typeof window === "undefined") return;
@@ -1502,6 +1515,17 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
     saveTeamSetup(lineupTeam);
     triggerLineup(rotationText);
   };
+
+  if (!syncReady) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 text-gray-600">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+          <p className="text-sm font-medium">Ladataan tietoja palvelimelta…</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-900">

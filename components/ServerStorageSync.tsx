@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { markServerSyncDone } from "@/lib/serverSyncSignal";
 
 const SYNC_KEY_PREFIXES = ["ligr:"];
 const EXTRA_SYNC_KEYS = new Set(["isAdmin"]);
@@ -44,9 +45,15 @@ export default function ServerStorageSync() {
 
         const serverKeys = Object.keys(serverEntries);
         if (serverKeys.length > 0) {
+          // Write server data directly to localStorage bypassing the patch
+          // so we don't re-send it back to the server during initial load.
+          const rawStorage = window.localStorage as Storage & { __originalSetItem?: Storage["setItem"] };
+          const directSetItem = rawStorage.__originalSetItem
+            ? rawStorage.__originalSetItem.bind(rawStorage)
+            : window.localStorage.setItem.bind(window.localStorage);
           serverKeys.forEach((key) => {
             if (!shouldSyncKey(key)) return;
-            window.localStorage.setItem(key, serverEntries[key]);
+            directSetItem(key, serverEntries[key]);
           });
         } else {
           const localEntries = collectSyncEntries();
@@ -56,6 +63,11 @@ export default function ServerStorageSync() {
         }
       } catch {
         // If bootstrap fails we keep local behavior and continue with local updates.
+      }
+
+      // Signal that initial server sync is complete — ControlRoom waits for this.
+      if (!cancelled) {
+        markServerSyncDone();
       }
 
       const storage = window.localStorage as Storage & {
