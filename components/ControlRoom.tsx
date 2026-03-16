@@ -2405,8 +2405,11 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
                         const awayTeamLogo = teams.find((team) => team.name === match.awayTeam)?.logo || "";
                         const matchLeagueLogo = leagues.find((league) => league.name === match.league)?.logo || "";
                         const versionQuery = productionUrlVersion ? `&v=${encodeURIComponent(productionUrlVersion)}` : "";
+                        const venueQuery = match.venue && match.venue.trim().length > 0
+                          ? `&venue=${encodeURIComponent(match.venue.trim())}`
+                          : "";
                         const livescoreUrl = `/livescore?match=${encodeURIComponent(resolvedMatchId)}${versionQuery}`;
-                        const overlayUrl = `/overlay?match=${encodeURIComponent(resolvedMatchId)}${versionQuery}`;
+                        const overlayUrl = `/overlay?match=${encodeURIComponent(resolvedMatchId)}${versionQuery}${venueQuery}`;
 
                         return <div key={match.id} className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">

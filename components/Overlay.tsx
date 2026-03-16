@@ -494,7 +494,11 @@ export default function Overlay() {
         const raw = localStorage.getItem(key);
         if (!raw) continue;
         const parsed = JSON.parse(raw) as Record<string, { homeTeam: string; awayTeam: string; homeLogo: string; awayLogo: string; leagueLogo: string; startAt: string; refereeName?: string; aet1Name?: string; aet2Name?: string; venue?: string }>;
-        const data = parsed?.[matchId];
+        const directData = parsed?.[matchId];
+        const caseInsensitiveData = directData
+          ? null
+          : Object.entries(parsed).find(([entryMatchId]) => entryMatchId.trim().toLowerCase() === normalizedMatchId)?.[1];
+        const data = directData || caseInsensitiveData;
         if (!data) continue;
 
         if (data.homeTeam) setHomeTeam(data.homeTeam);
@@ -506,13 +510,15 @@ export default function Overlay() {
         setRefereeName(data.refereeName || "");
         setAet1Name(data.aet1Name || "");
         setAet2Name(data.aet2Name || "");
-        setVenue(data.venue || "");
+        if (typeof data.venue === "string" && data.venue.trim()) {
+          setVenue(data.venue.trim());
+        }
         break;
       } catch {
         // Ignore malformed localStorage payloads.
       }
     }
-  }, [matchId]);
+  }, [matchId, normalizedMatchId]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -1862,49 +1868,55 @@ export default function Overlay() {
                 </div>
 
                 {/* Pitch */}
-                <div className="relative overflow-hidden bg-gradient-to-b from-[#0b8b92] via-[#0a7f86] to-[#06656b]">
-                  {/* Pitch outline & lines */}
-                  <div className="pointer-events-none absolute inset-x-14 inset-y-3 border-2 border-white/40">
-                    <div className="absolute inset-0 bg-[repeating-linear-gradient(180deg,rgba(255,255,255,0.04)_0px,rgba(255,255,255,0.04)_34px,rgba(0,0,0,0.06)_34px,rgba(0,0,0,0.06)_68px)]" />
-                    <div className="absolute left-0 right-0 top-1/2 h-[2px] -translate-y-px bg-white/40" />
-                    <svg className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" width="130" height="130" viewBox="0 0 130 130">
-                      <circle cx="65" cy="65" r="58" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="2" />
-                    </svg>
-                    <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/60" />
-                    <div className="absolute top-0 left-1/2 h-[22%] w-[44%] -translate-x-1/2 border-2 border-t-0 border-white/40" />
-                    <div className="absolute top-0 left-1/2 h-[9%] w-[18%] -translate-x-1/2 border-2 border-t-0 border-white/40" />
-                    <div className="absolute left-1/2 top-[13%] h-2 w-2 -translate-x-1/2 rounded-full bg-white/60" />
-                    <div className="absolute bottom-0 left-1/2 h-[22%] w-[44%] -translate-x-1/2 border-2 border-b-0 border-white/40" />
-                    <div className="absolute bottom-0 left-1/2 h-[9%] w-[18%] -translate-x-1/2 border-2 border-b-0 border-white/40" />
-                    <div className="absolute left-1/2 bottom-[13%] h-2 w-2 -translate-x-1/2 rounded-full bg-white/60" />
-                    <div className="absolute left-0 top-0 h-8 w-8 rounded-br-full border-r-2 border-b-2 border-white/40" />
-                    <div className="absolute right-0 top-0 h-8 w-8 rounded-bl-full border-l-2 border-b-2 border-white/40" />
-                    <div className="absolute left-0 bottom-0 h-8 w-8 rounded-tr-full border-r-2 border-t-2 border-white/40" />
-                    <div className="absolute right-0 bottom-0 h-8 w-8 rounded-tl-full border-l-2 border-t-2 border-white/40" />
-                  </div>
+                <div className="relative overflow-hidden bg-gradient-to-b from-[#0e9ca4] via-[#0a7f86] to-[#065a60]">
+                  <div className="absolute inset-4">
+                    <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[8px] border-2 border-white/40">
+                      <div className="absolute inset-0 bg-[repeating-linear-gradient(180deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_34px,rgba(0,0,0,0.06)_34px,rgba(0,0,0,0.06)_68px)]" />
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.09)_0%,rgba(255,255,255,0)_55%)]" />
+                      <div className="absolute left-0 right-0 top-1/2 h-[2px] -translate-y-px bg-white/40" />
+                      <svg className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" width="124" height="124" viewBox="0 0 124 124">
+                        <circle cx="62" cy="62" r="56" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="2" />
+                      </svg>
+                      <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/60" />
 
-                  {/* Player tokens */}
-                  {slots.map((slot) => {
-                    const num = getPlayerNumber(slot.player);
-                    const lastName = getPlayerLastName(slot.player).toUpperCase();
-                    const displayTop = 100 - slot.top;
-                    const playerPhoto = getRotationPlayerPhoto(visibleRosterPanel, slot.player);
-                    return (
-                      <div
-                        key={`pitch-slot-${slot.key}`}
-                        className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
-                        style={{ left: `${slot.left}%`, top: `${displayTop}%` }}
-                      >
-                        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-2 border-white/70 bg-[#0d3f42] shadow-lg">
-                          {playerPhoto
-                            ? <img src={playerPhoto} alt={slot.player} className="h-full w-full object-cover" />
-                            : <div className="text-lg font-black text-white">{num || "?"}</div>
-                          }
+                      <div className="absolute left-1/2 top-0 h-[20%] w-[44%] -translate-x-1/2 border-2 border-t-0 border-white/40" />
+                      <div className="absolute left-1/2 top-0 h-[9%] w-[18%] -translate-x-1/2 border-2 border-t-0 border-white/40" />
+                      <div className="absolute left-1/2 top-[12%] h-2 w-2 -translate-x-1/2 rounded-full bg-white/60" />
+
+                      <div className="absolute left-1/2 bottom-0 h-[20%] w-[44%] -translate-x-1/2 border-2 border-b-0 border-white/40" />
+                      <div className="absolute left-1/2 bottom-0 h-[9%] w-[18%] -translate-x-1/2 border-2 border-b-0 border-white/40" />
+                      <div className="absolute left-1/2 bottom-[12%] h-2 w-2 -translate-x-1/2 rounded-full bg-white/60" />
+
+                      <div className="absolute left-0 top-0 h-8 w-8 rounded-br-full border-b-2 border-r-2 border-white/40" />
+                      <div className="absolute right-0 top-0 h-8 w-8 rounded-bl-full border-b-2 border-l-2 border-white/40" />
+                      <div className="absolute bottom-0 left-0 h-8 w-8 rounded-tr-full border-r-2 border-t-2 border-white/40" />
+                      <div className="absolute bottom-0 right-0 h-8 w-8 rounded-tl-full border-l-2 border-t-2 border-white/40" />
+                    </div>
+
+                    {/* Player tokens */}
+                    {slots.map((slot) => {
+                      const num = getPlayerNumber(slot.player);
+                      const lastName = getPlayerLastName(slot.player).toUpperCase();
+                      const displayLeft = Math.min(95, Math.max(5, slot.left));
+                      const displayTop = Math.min(95, Math.max(5, 100 - slot.top));
+                      const playerPhoto = getRotationPlayerPhoto(visibleRosterPanel, slot.player);
+                      return (
+                        <div
+                          key={`pitch-slot-${slot.key}`}
+                          className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
+                          style={{ left: `${displayLeft}%`, top: `${displayTop}%` }}
+                        >
+                          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-2 border-white/70 bg-[#0d3f42] shadow-lg">
+                            {playerPhoto
+                              ? <img src={playerPhoto} alt={slot.player} className="h-full w-full object-cover" />
+                              : <div className="text-lg font-black text-white">{num || "?"}</div>
+                            }
+                          </div>
+                          <p className="mt-0.5 rounded bg-black/32 px-1.5 py-[2px] text-[12px] font-black leading-none text-white drop-shadow">{num ? `${num}.` : ""} {lastName}</p>
                         </div>
-                        <p className="mt-0.5 rounded bg-black/28 px-1.5 py-[2px] text-[12px] font-black leading-none text-white drop-shadow">{num ? `${num}.` : ""} {lastName}</p>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Bench list */}
