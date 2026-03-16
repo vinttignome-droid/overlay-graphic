@@ -318,6 +318,7 @@ export default function Overlay() {
   const awayLogoFromQuery = (searchParams.get("awayLogo") || "").trim();
   const leagueLogoFromQuery = (searchParams.get("leagueLogo") || "").trim();
   const startAtFromQuery = (searchParams.get("startAt") || "").trim();
+  const venueFromQuery = (searchParams.get("venue") || "").trim();
 
   const [homeTeam, setHomeTeam] = useState(homeTeamFromQuery || "KOTI");
   const [awayTeam, setAwayTeam] = useState(awayTeamFromQuery || "VIERAS");
@@ -367,7 +368,7 @@ export default function Overlay() {
   const [refereeName, setRefereeName] = useState("");
   const [aet1Name, setAet1Name] = useState("");
   const [aet2Name, setAet2Name] = useState("");
-  const [venue, setVenue] = useState("");
+  const [venue, setVenue] = useState(venueFromQuery);
   const [sponsorLogo, setSponsorLogo] = useState("");
 
   const [overlayStyle, setOverlayStyle] = useState<OverlayStyleKey>("ligr-pro");
@@ -431,7 +432,8 @@ export default function Overlay() {
     if (awayLogoFromQuery) setAwayLogo(awayLogoFromQuery);
     if (leagueLogoFromQuery) setLeagueLogo(leagueLogoFromQuery);
     if (startAtFromQuery) setStartAt(startAtFromQuery);
-  }, [awayLogoFromQuery, awayTeamFromQuery, homeLogoFromQuery, homeTeamFromQuery, leagueLogoFromQuery, startAtFromQuery]);
+    if (venueFromQuery) setVenue(venueFromQuery);
+  }, [awayLogoFromQuery, awayTeamFromQuery, homeLogoFromQuery, homeTeamFromQuery, leagueLogoFromQuery, startAtFromQuery, venueFromQuery]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -995,9 +997,13 @@ export default function Overlay() {
         setTimeout(() => setShowFullscreen(false), 7000);
       }
       if (d.type === "branding") {
-        setHomeLogo((d.homeLogo as string) || "");
-        setAwayLogo((d.awayLogo as string) || "");
-        setLeagueLogo((d.leagueLogo as string) || "");
+        // Keep current logos if upstream sends empty fields during heartbeat updates.
+        const nextHomeLogo = typeof d.homeLogo === "string" ? d.homeLogo.trim() : "";
+        const nextAwayLogo = typeof d.awayLogo === "string" ? d.awayLogo.trim() : "";
+        const nextLeagueLogo = typeof d.leagueLogo === "string" ? d.leagueLogo.trim() : "";
+        if (nextHomeLogo) setHomeLogo(nextHomeLogo);
+        if (nextAwayLogo) setAwayLogo(nextAwayLogo);
+        if (nextLeagueLogo) setLeagueLogo(nextLeagueLogo);
         setSponsorLogo((d.sponsorLogo as string) || "");
       }
     };
@@ -1250,9 +1256,11 @@ export default function Overlay() {
                   {kickoffDateLabel}{kickoffDateLabel && kickoffTimeLabel ? "\u2002\u2002" : ""}{kickoffTimeLabel}
                 </p>
               ) : <div />}
-              {venue ? (
-                <p className="text-[26px] font-semibold tracking-wide" style={{ color: streamPalette.text }}>Stadium: {venue}</p>
-              ) : <div />}
+              <div className="flex flex-col items-end gap-2">
+                <p className="text-[26px] font-semibold tracking-wide" style={{ color: streamPalette.text }}>
+                  Stadium: {venue || "-"}
+                </p>
+              </div>
             </div>
 
             {/* Thin separator */}
@@ -1261,7 +1269,7 @@ export default function Overlay() {
             {/* ── Main content ── */}
             <div className="flex flex-1 flex-col items-center justify-center gap-8">
               {leagueLogo ? (
-                <img src={leagueLogo} alt="League" className="h-24 object-contain drop-shadow-lg" />
+                <img src={leagueLogo} alt="League" className="h-72 object-contain drop-shadow-lg" />
               ) : null}
               <p className="text-[42px] font-semibold tracking-[0.06em]" style={{ color: streamPalette.textDim }}>Waiting for match</p>
               {venue ? (

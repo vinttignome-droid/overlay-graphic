@@ -776,6 +776,35 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
   const triggerFullscreen = () => {
     relayEngineMessage({ type: "fullscreen", text: fullscreenText });
   };
+  const copyToClipboard = async (text: string) => {
+    if (typeof window === "undefined") return false;
+
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        // Fall through to legacy copy method.
+      }
+    }
+
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.setAttribute("readonly", "");
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      textArea.style.left = "-9999px";
+      document.body.appendChild(textArea);
+      textArea.select();
+      textArea.setSelectionRange(0, textArea.value.length);
+      const copied = document.execCommand("copy");
+      document.body.removeChild(textArea);
+      return copied;
+    } catch {
+      return false;
+    }
+  };
   const changeScene = (s: string) => {
     relayEngineMessage({ type: "scene", scene: s });
   };
@@ -2577,12 +2606,13 @@ export default function ControlRoom({ sport }: ControlRoomProps) {
                                     <button
                                       type="button"
                                       className="shrink-0 rounded-lg bg-blue-600 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-700 transition-colors"
-                                      onClick={() => {
+                                      onClick={async () => {
                                         const url = typeof window !== "undefined" ? `${window.location.origin}${overlayUrl}` : overlayUrl;
-                                        navigator.clipboard.writeText(url).then(() => {
+                                        const copied = await copyToClipboard(url);
+                                        if (copied) {
                                           setCopiedMatchId(match.id);
                                           setTimeout(() => setCopiedMatchId((prev) => (prev === match.id ? null : prev)), 2000);
-                                        }).catch(() => undefined);
+                                        }
                                       }}
                                     >
                                       {copiedMatchId === match.id ? "✓ Kopioitu!" : "Kopioi"}
