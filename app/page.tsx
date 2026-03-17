@@ -678,14 +678,6 @@ export default function HomePage() {
               >
                 Kirjaudu ulos
               </Button>
-            ) : (
-              <Button 
-                onClick={() => setAdminOpen(true)}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                Kirjaudu
-              </Button>
-            )}
           </div>
         </div>
       </header>
