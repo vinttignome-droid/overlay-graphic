@@ -82,4 +82,4 @@ export default function SportAdminPage() {
   }
 
   return <ControlRoom sport={sport} onLogout={handleLogout} />;
-}
+// ...existing code...
