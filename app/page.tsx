@@ -671,16 +671,17 @@ export default function HomePage() {
               </span>
             )}
             {isAdmin ? (
-				<Button 
-					onClick={logout}
-					variant="outline"
-					className="hover:bg-red-50"
-				>
-					Kirjaudu ulos
-				</Button>
-			</div>
-		</div>
-	</header>
+        <Button 
+          onClick={logout}
+          variant="outline"
+          className="hover:bg-red-50"
+        >
+          Kirjaudu ulos
+        </Button>
+      ) : null}
+      </div>
+    </div>
+  </header>
 
       {!loggedIn && !isStatsView && (
         <motion.section 
