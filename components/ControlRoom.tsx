@@ -15,7 +15,6 @@ interface ControlRoomProps {
 
 export default function ControlRoom({ sport, onLogout }: ControlRoomProps) {
   // ...existing code...
-  const leaguesStorageKey = `ligr:${sport}:leagues`;
   const teamsStorageKey = `ligr:${sport}:teams`;
   const matchesStorageKey = `ligr:${sport}:matches`;
   const matchLinkDataStorageKey = `ligr:${sport}:match-link-data`;
