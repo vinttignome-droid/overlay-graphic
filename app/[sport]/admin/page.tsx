@@ -22,8 +22,8 @@ export default function SportAdminPage() {
       const stored = localStorage.getItem(AUTH_KEY);
       if (stored === "true") {
         setIsAuthenticated(true);
-
-
+      }
+    }
   }, []);
 
   const handleLogin = (event: FormEvent<HTMLFormElement>) => {
@@ -82,3 +82,5 @@ export default function SportAdminPage() {
   }
 
   return <ControlRoom sport={sport} onLogout={handleLogout} />;
+
+}
