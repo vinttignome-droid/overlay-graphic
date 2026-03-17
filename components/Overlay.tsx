@@ -623,6 +623,7 @@ export default function Overlay() {
     };
 
     if (hasStartSignal()) {
+      console.log('[Overlay DEBUG] setShowPreMatchPreview(false) syy: hasStartSignal');
       setShowPreMatchPreview(false);
     }
 
@@ -633,12 +634,14 @@ export default function Overlay() {
           event.key === forceHidePreMatchKey ||
           (!hasMatchId && (event.key === legacyGlobalMatchStartKey || event.key === legacyForceHidePreMatchKey)))
       ) {
+        console.log('[Overlay DEBUG] setShowPreMatchPreview(false) syy: onStorage event', event.key);
         setShowPreMatchPreview(false);
       }
     };
 
     const poll = window.setInterval(() => {
       if (hasStartSignal()) {
+        console.log('[Overlay DEBUG] setShowPreMatchPreview(false) syy: poll hasStartSignal');
         setShowPreMatchPreview(false);
       }
     }, 800);
@@ -717,6 +720,7 @@ export default function Overlay() {
       }
       if (d.type === "scene" && typeof d.scene === "string") setScene(d.scene);
       if (d.type === "matchStart") {
+        console.log('[Overlay DEBUG] setShowPreMatchPreview(false) syy: d.type === "matchStart"');
         const incomingMatchId = typeof d.matchId === "string" ? d.matchId.toLowerCase().trim() : "";
         if (!normalizedMatchId || !incomingMatchId || incomingMatchId === normalizedMatchId) {
           setShowPreMatchPreview(false);
@@ -728,6 +732,7 @@ export default function Overlay() {
       if (d.type === "hidePreMatch") {
         const incomingMatchId = typeof d.matchId === "string" ? d.matchId.toLowerCase().trim() : "";
         if (!normalizedMatchId || !incomingMatchId || incomingMatchId === normalizedMatchId) {
+          console.log('[Overlay DEBUG] setShowPreMatchPreview(false) syy: d.type === "hidePreMatch"');
           setShowPreMatchPreview(false);
           setShowAboutToStart(false);
           setShowHalftimeStats(false);
@@ -737,6 +742,7 @@ export default function Overlay() {
       if (d.type === "aboutToStart") {
         const incomingMatchId = typeof d.matchId === "string" ? d.matchId.toLowerCase().trim() : "";
         if (!normalizedMatchId || !incomingMatchId || incomingMatchId === normalizedMatchId) {
+          console.log('[Overlay DEBUG] setShowPreMatchPreview(false) syy: d.type === "aboutToStart"');
           setShowPreMatchPreview(false);
           setShowGameClock(false);
           setShowHalftimeStats(false);
@@ -879,6 +885,7 @@ export default function Overlay() {
 
           if (rosterVisible) {
             // Roster mode should take focus over banners/cards when "Kokoonpanot" is triggered.
+            console.log('[Overlay DEBUG] setShowPreMatchPreview(false) syy: rosterVisible');
             setShowPreMatchPreview(false);
             setShowAboutToStart(false);
             setShowHalftimeStats(false);
