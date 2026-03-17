@@ -32,6 +32,7 @@ export default function Header() {
           <nav className="flex space-x-4">
             <Link href="/" className="text-gray-600 hover:text-gray-900">Etusivu</Link>
             <Link href="/?tab=stats" className="text-gray-600 hover:text-gray-900">Tilastot</Link>
+                        <Link href="/jalkapallo/admin" className="text-gray-600 hover:text-gray-900">Admin</Link>
             {/* Kirjaudu-linkki poistettu */}
             {!isHomePage && (
               <Link href={`/${sports[0].key}/admin`} className="text-gray-600 hover:text-gray-900">Admin</Link>
