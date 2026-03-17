@@ -1,5 +1,18 @@
-"use client";
 
+"use client";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import Sidebar from "@/components/Sidebar";
+import { motion } from "framer-motion";
+import { relayPublish } from "@/lib/realtimeRelay";
+import { isServerSyncDone, SYNC_DONE_EVENT } from "@/lib/serverSyncSignal";
+
+interface ControlRoomProps {
+  sport: string;
+  onLogout?: () => void;
+}
 
 export default function ControlRoom({ sport, onLogout }: ControlRoomProps) {
   // ...existing code...
@@ -45,19 +58,6 @@ export default function ControlRoom({ sport, onLogout }: ControlRoomProps) {
     window.addEventListener("storage", handleStorage);
     return () => window.removeEventListener("storage", handleStorage);
   }, [leaguesStorageKey, teamsStorageKey, matchesStorageKey, playersStorageKey, lineupsStorageKey, footballRotationsStorageKey]);
-import { useState, useEffect, useMemo, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import Sidebar from "@/components/Sidebar";
-import { motion } from "framer-motion";
-import { relayPublish } from "@/lib/realtimeRelay";
-import { isServerSyncDone, SYNC_DONE_EVENT } from "@/lib/serverSyncSignal";
-
-interface ControlRoomProps {
-  sport: string;
-  onLogout?: () => void;
-}
 
 type League = {
   name: string;
