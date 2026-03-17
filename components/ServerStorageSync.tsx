@@ -36,6 +36,7 @@ export default function ServerStorageSync() {
       }
     };
 
+    // Alustava synkronointi kuten ennen
     const initSync = async () => {
       try {
         const response = await fetch("/api/storage", { cache: "no-store" });
@@ -45,8 +46,6 @@ export default function ServerStorageSync() {
 
         const serverKeys = Object.keys(serverEntries);
         if (serverKeys.length > 0) {
-          // Write server data directly to localStorage bypassing the patch
-          // so we don't re-send it back to the server during initial load.
           const rawStorage = window.localStorage as Storage & { __originalSetItem?: Storage["setItem"] };
           const directSetItem = rawStorage.__originalSetItem
             ? rawStorage.__originalSetItem.bind(rawStorage)
@@ -65,7 +64,6 @@ export default function ServerStorageSync() {
         // If bootstrap fails we keep local behavior and continue with local updates.
       }
 
-      // Signal that initial server sync is complete — ControlRoom waits for this.
       if (!cancelled) {
         markServerSyncDone();
       }
@@ -102,8 +100,45 @@ export default function ServerStorageSync() {
 
     void initSync();
 
+    // POLLING: Hae serveriltä uusin data 5s välein ja päivitä localStorageen jos muuttunut
+    let lastServerEntries: Record<string, string> = {};
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch("/api/storage", { cache: "no-store" });
+        const data = (await response.json()) as { entries?: Record<string, string> };
+        const serverEntries = data?.entries && typeof data.entries === "object" ? data.entries : {};
+        // Päivitä localStorage vain jos data muuttui
+        const changed = Object.keys(serverEntries).some(
+          (key) => shouldSyncKey(key) && serverEntries[key] !== lastServerEntries[key]
+        ) || Object.keys(lastServerEntries).some(
+          (key) => shouldSyncKey(key) && !(key in serverEntries)
+        );
+        if (changed) {
+          const rawStorage = window.localStorage as Storage & { __originalSetItem?: Storage["setItem"] };
+          const directSetItem = rawStorage.__originalSetItem
+            ? rawStorage.__originalSetItem.bind(rawStorage)
+            : window.localStorage.setItem.bind(window.localStorage);
+          Object.keys(serverEntries).forEach((key) => {
+            if (!shouldSyncKey(key)) return;
+            directSetItem(key, serverEntries[key]);
+          });
+          // Poista localStoragesta avaimet joita ei enää ole serverillä
+          Object.keys(lastServerEntries).forEach((key) => {
+            if (!shouldSyncKey(key)) return;
+            if (!(key in serverEntries)) {
+              window.localStorage.removeItem(key);
+            }
+          });
+          lastServerEntries = { ...serverEntries };
+        }
+      } catch {
+        // ignore
+      }
+    }, 5000);
+
     return () => {
       cancelled = true;
+      clearInterval(pollInterval);
     };
   }, []);
 
