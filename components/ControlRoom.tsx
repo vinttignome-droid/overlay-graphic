@@ -1,24 +1,5 @@
 "use client";
 import { useState, useEffect, useMemo, useRef } from "react";
-  // Poll server for latest storage every 10s ja päivitä localStorage
-  useEffect(() => {
-    const poll = setInterval(async () => {
-      try {
-        const response = await fetch("/api/storage", { cache: "no-store" });
-        const data = (await response.json()) as { entries?: Record<string, string> };
-        const serverEntries = data?.entries && typeof data.entries === "object" ? data.entries : {};
-        const rawStorage = window.localStorage as Storage & { __originalSetItem?: Storage["setItem"] };
-        const directSetItem = rawStorage.__originalSetItem
-          ? rawStorage.__originalSetItem.bind(rawStorage)
-          : window.localStorage.setItem.bind(window.localStorage);
-        Object.keys(serverEntries).forEach((key) => {
-          if (!key.startsWith("ligr:")) return;
-          directSetItem(key, serverEntries[key]);
-        });
-      } catch {}
-    }, 10000); // 10s välein
-    return () => clearInterval(poll);
-  }, []);
 // Poll server for latest storage every 10s ja päivitä localStorage
 useEffect(() => {
   const poll = setInterval(async () => {
