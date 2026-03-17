@@ -1,3 +1,37 @@
+  // Kuuntele localStorage-muutoksia (esim. polling tai toinen selain)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleStorage = (event: StorageEvent) => {
+      // Synkronoi vain relevantit avaimet
+      if (!event.key) return;
+      const keys = [leaguesStorageKey, teamsStorageKey, matchesStorageKey, playersStorageKey, lineupsStorageKey, footballRotationsStorageKey];
+      if (!keys.includes(event.key)) return;
+      // Lataa uusimmat tiedot localStoragesta
+      try {
+        if (event.key === leaguesStorageKey) {
+          const raw = localStorage.getItem(leaguesStorageKey);
+          setLeagues(raw ? JSON.parse(raw) : []);
+        } else if (event.key === teamsStorageKey) {
+          const raw = localStorage.getItem(teamsStorageKey);
+          setTeams(raw ? JSON.parse(raw) : []);
+        } else if (event.key === matchesStorageKey) {
+          const raw = localStorage.getItem(matchesStorageKey);
+          setMatches(raw ? JSON.parse(raw) : []);
+        } else if (event.key === playersStorageKey) {
+          const raw = localStorage.getItem(playersStorageKey);
+          setPlayers(raw ? JSON.parse(raw) : []);
+        } else if (event.key === lineupsStorageKey) {
+          const raw = localStorage.getItem(lineupsStorageKey);
+          setLineupsByTeam(raw ? JSON.parse(raw) : {});
+        } else if (event.key === footballRotationsStorageKey) {
+          const raw = localStorage.getItem(footballRotationsStorageKey);
+          setFootballRotationsByTeam(raw ? JSON.parse(raw) : {});
+        }
+      } catch {}
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, [leaguesStorageKey, teamsStorageKey, matchesStorageKey, playersStorageKey, lineupsStorageKey, footballRotationsStorageKey]);
 "use client";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
