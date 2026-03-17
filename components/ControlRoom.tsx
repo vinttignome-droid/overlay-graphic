@@ -256,28 +256,6 @@ const toThemeToken = (value: string) =>
     .replace(/[^a-z0-9\-]/g, "");
 
 const createThemeMatchId = (homeTeam: string, awayTeam: string) => `${toThemeToken(homeTeam)}-vs-${toThemeToken(awayTeam)}`;
-
-export default function ControlRoom({ sport, onLogout }: ControlRoomProps) {
-  const router = useRouter();
-  const getPlayerPhoto = (photo: string) => photo || DEFAULT_PLAYER_SILHOUETTE;
-  const normalizedSport = (sport || "").trim().toLowerCase();
-  const isFootballSport = normalizedSport.includes("jalkapallo") || normalizedSport.includes("football");
-
-  const availableSports = [
-    { key: "jalkapallo", label: "Jalkapallo" },
-    { key: "salibandy", label: "Salibandy" },
-    { key: "koripallo", label: "Koripallo" },
-  ];
-  /* ============= match state ============= */
-  const [homeTeam, setHomeTeam] = useState("HOME");
-  const [awayTeam, setAwayTeam] = useState("AWAY");
-  const [homeScore, setHomeScore] = useState(0);
-  const [awayScore, setAwayScore] = useState(0);
-  const [period, setPeriod] = useState("1");
-  const [clock, setClock] = useState("00:00");
-  const shouldBroadcastScoreState = !isPlaceholderTeamName(homeTeam) || !isPlaceholderTeamName(awayTeam);
-
-  /* ============= clock ============ */
   const [clockRunning, setClockRunning] = useState(false);
   const [externalClockActive, setExternalClockActive] = useState(false);
 
