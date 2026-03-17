@@ -2821,11 +2821,13 @@ export default function ControlRoom({ sport, onLogout }: ControlRoomProps) {
                       >
                         <div className="p-6">
                           <div className="flex items-center gap-4">
-                            <img
-                              src={l.logo}
-                              alt={l.name}
-                              className="h-14 w-14 rounded-full border border-gray-200 object-cover"
-                            />
+                            {l.logo ? (
+                              <img
+                                src={l.logo}
+                                alt={l.name}
+                                className="h-14 w-14 rounded-full border border-gray-200 object-cover"
+                              />
+                            ) : null}
                             <div>
                               <p className="font-semibold text-gray-900">{l.name}</p>
                               <p className="text-xs text-gray-500">Peliaika: {l.matchTimeMinutes} min</p>
