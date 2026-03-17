@@ -23,7 +23,7 @@ export default function SportAdminPage() {
       if (stored === "true") {
         setIsAuthenticated(true);
 
-    }
+
   }, []);
 
   const handleLogin = (event: FormEvent<HTMLFormElement>) => {
