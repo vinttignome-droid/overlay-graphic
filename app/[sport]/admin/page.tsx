@@ -17,16 +17,19 @@ export default function SportAdminPage() {
   const [error, setError] = useState("");
 
   // Restore session from localStorage on page load/refresh
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const res = await fetch("/api/storage", { cache: "no-store" });
-      const data = await res.json();
-      const stored = data.entries?.[AUTH_KEY];
-      if (stored === "true") {
-        setIsAuthenticated(true);
+    useEffect(() => {
+      async function fetchAuth() {
+        if (typeof window !== "undefined") {
+          const res = await fetch("/api/storage", { cache: "no-store" });
+          const data = await res.json();
+          const stored = data.entries?.[AUTH_KEY];
+          if (stored === "true") {
+            setIsAuthenticated(true);
+          }
+        }
       }
-    }
-  }, []);
+      fetchAuth();
+    }, []);
 
   const handleLogin = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
