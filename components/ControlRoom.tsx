@@ -331,7 +331,6 @@ const createThemeMatchId = (homeTeam: string, awayTeam: string) => `${toThemeTok
   const [copiedMatchId, setCopiedMatchId] = useState<string | null>(null);
   const [productionUrlVersionByMatchId, setProductionUrlVersionByMatchId] = useState<Record<string, string>>({});
   const engineChannelRef = useRef<BroadcastChannel | null>(null);
-  const leaguesStorageKey = `ligr:${sport}:leagues`;
   const teamsStorageKey = `ligr:${sport}:teams`;
   const matchesStorageKey = `ligr:${sport}:matches`;
   const matchLinkDataStorageKey = `ligr:${sport}:match-link-data`;
