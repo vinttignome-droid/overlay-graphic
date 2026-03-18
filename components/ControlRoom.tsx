@@ -15,7 +15,6 @@ interface ControlRoomProps {
 
 export default function ControlRoom({ sport, onLogout }: ControlRoomProps) {
   // ...existing code...
-  const teamsStorageKey = `ligr:${sport}:teams`;
 
   // Kuuntele localStorage-muutoksia (esim. polling tai toinen selain)
   useEffect(() => {
