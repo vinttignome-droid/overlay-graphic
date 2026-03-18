@@ -293,6 +293,12 @@ const createThemeMatchId = (homeTeam: string, awayTeam: string) => `${toThemeTok
   const [editingLeagueIndex, setEditingLeagueIndex] = useState<number | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
+    const [homeTeam, setHomeTeam] = useState("");
+    const [awayTeam, setAwayTeam] = useState("");
+    const [homeScore, setHomeScore] = useState(0);
+    const [awayScore, setAwayScore] = useState(0);
+    const [period, setPeriod] = useState("1");
+    const [clock, setClock] = useState("00:00");
   const [newMatchHomeTeam, setNewMatchHomeTeam] = useState("");
   const [newMatchAwayTeam, setNewMatchAwayTeam] = useState("");
   const [newMatchLeague, setNewMatchLeague] = useState("");
@@ -1548,7 +1554,7 @@ const createThemeMatchId = (homeTeam: string, awayTeam: string) => `${toThemeTok
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-ind
       <header className="bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
