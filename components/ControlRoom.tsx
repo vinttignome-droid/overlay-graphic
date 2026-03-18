@@ -14,6 +14,18 @@ interface ControlRoomProps {
 }
 
 export default function ControlRoom({ sport, onLogout }: ControlRoomProps) {
+      // Puuttuvat määrittelyt
+      const router = useRouter();
+      const availableSports = [
+        { key: "football", label: "Jalkapallo" },
+        { key: "icehockey", label: "Jääkiekko" },
+        { key: "basketball", label: "Koripallo" }
+      ];
+      const isFootballSport = sport === "football";
+      const [shouldBroadcastScoreState, setShouldBroadcastScoreState] = useState(false);
+      function getPlayerPhoto(photo) {
+        return photo || "/default-player.png";
+      }
     // Storage avaimet heti funktion alkuun
     const leaguesStorageKey = `ligr:${sport}:leagues`;
     const teamsStorageKey = `ligr:${sport}:teams`;
@@ -1554,7 +1566,7 @@ const createThemeMatchId = (homeTeam: string, awayTeam: string) => `${toThemeTok
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-ind
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <header className="bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
