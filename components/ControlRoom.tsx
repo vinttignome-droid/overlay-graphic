@@ -335,7 +335,6 @@ const createThemeMatchId = (homeTeam: string, awayTeam: string) => `${toThemeTok
   const matchesStorageKey = `ligr:${sport}:matches`;
   const matchLinkDataStorageKey = `ligr:${sport}:match-link-data`;
   const playersStorageKey = `ligr:${sport}:players`;
-  const lineupsStorageKey = `ligr:${sport}:lineups`;
   const [hasLoadedStorage, setHasLoadedStorage] = useState(false);
   const [syncReady, setSyncReady] = useState(() =>
     typeof window !== "undefined" && isServerSyncDone()
