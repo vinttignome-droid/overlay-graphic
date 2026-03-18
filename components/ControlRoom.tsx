@@ -23,7 +23,7 @@ export default function ControlRoom({ sport, onLogout }: ControlRoomProps) {
       ];
       const isFootballSport = sport === "football";
       const [shouldBroadcastScoreState, setShouldBroadcastScoreState] = useState(false);
-      function getPlayerPhoto(photo) {
+      function getPlayerPhoto(photo: string) {
         return photo || "/default-player.png";
       }
     // Storage avaimet heti funktion alkuun
