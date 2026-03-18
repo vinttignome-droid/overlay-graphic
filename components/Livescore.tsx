@@ -1,3 +1,17 @@
+  // Poll server storage every 2 seconds for real-time sync
+  useEffect(() => {
+    const pollInterval = setInterval(() => {
+      fetch("/api/storage", { cache: "no-store" })
+        .then(res => res.json())
+        .then(data => {
+          const entries = data.entries || {};
+          // Päivitä tarvittavat state-muuttujat entries-datasta
+          // Esimerkki: setPlayers(entries[playersStorageKey] ? JSON.parse(entries[playersStorageKey]) : []);
+          // Lisää tähän kaikki state-muuttujat joita haluat synkronoida
+        });
+    }, 2000);
+    return () => clearInterval(pollInterval);
+  }, []);
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -249,7 +263,12 @@ export default function Livescore() {
     const message = { ...payload, relayTs };
     engineChannelRef.current?.postMessage(message);
     if (typeof window !== "undefined") {
-      localStorage.setItem(ENGINE_RELAY_KEY, JSON.stringify(message));
+      // Tallenna serverille (kovalevylle) ENGINE_RELAY_KEY
+      fetch("/api/storage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "set", key: ENGINE_RELAY_KEY, value: JSON.stringify(message) })
+      });
     }
     relayPublish(message);
   };
@@ -730,17 +749,29 @@ export default function Livescore() {
     };
 
     try {
-      const raw = localStorage.getItem(PLAYER_MATCH_STATS_KEY);
+      const res = await fetch("/api/storage", { cache: "no-store" });
+      const data = await res.json();
+      const raw = data.entries?.[PLAYER_MATCH_STATS_KEY];
       const parsed = raw ? (JSON.parse(raw) as Array<{ matchId: string } & Record<string, unknown>>) : [];
       const next = Array.isArray(parsed) ? parsed.filter((item) => item.matchId !== matchRecord.matchId) : [];
       next.push(matchRecord);
-      localStorage.setItem(PLAYER_MATCH_STATS_KEY, JSON.stringify(next));
+      fetch("/api/storage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "set", key: PLAYER_MATCH_STATS_KEY, value: JSON.stringify(next) })
+      });
     } catch {
-      localStorage.setItem(PLAYER_MATCH_STATS_KEY, JSON.stringify([matchRecord]));
+      fetch("/api/storage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "set", key: PLAYER_MATCH_STATS_KEY, value: JSON.stringify([matchRecord]) })
+      });
     }
 
     try {
-      const rawTeamStats = localStorage.getItem(TEAM_MATCH_STATS_KEY);
+      const resTeam = await fetch("/api/storage", { cache: "no-store" });
+      const dataTeam = await resTeam.json();
+      const rawTeamStats = dataTeam.entries?.[TEAM_MATCH_STATS_KEY];
       const parsedTeamStats = rawTeamStats ? (JSON.parse(rawTeamStats) as Array<{ matchId: string } & Record<string, unknown>>) : [];
       const nextTeamStats = Array.isArray(parsedTeamStats)
         ? parsedTeamStats.filter((item) => item.matchId !== matchRecord.matchId)
@@ -755,20 +786,28 @@ export default function Livescore() {
         totalMinutes: persistedTotalMinutes,
         teams: teamStats,
       });
-      localStorage.setItem(TEAM_MATCH_STATS_KEY, JSON.stringify(nextTeamStats));
+      fetch("/api/storage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "set", key: TEAM_MATCH_STATS_KEY, value: JSON.stringify(nextTeamStats) })
+      });
     } catch {
-      localStorage.setItem(TEAM_MATCH_STATS_KEY, JSON.stringify([
-        {
-          matchId: matchRecord.matchId,
-          playedAt: matchRecord.playedAt,
-          homeTeam,
-          awayTeam,
-          homeScore: finalHomeScore,
-          awayScore: finalAwayScore,
-          totalMinutes: persistedTotalMinutes,
-          teams: teamStats,
-        },
-      ]));
+      fetch("/api/storage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "set", key: TEAM_MATCH_STATS_KEY, value: JSON.stringify([
+          {
+            matchId: matchRecord.matchId,
+            playedAt: matchRecord.playedAt,
+            homeTeam,
+            awayTeam,
+            homeScore: finalHomeScore,
+            awayScore: finalAwayScore,
+            totalMinutes: persistedTotalMinutes,
+            teams: teamStats,
+          },
+        ]) })
+      });
     }
   };
   const [clockMinutes = "00", clockSeconds = "00"] = clock.split(":");

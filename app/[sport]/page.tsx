@@ -1,4 +1,4 @@
-export default function SportSite({ params }: { params: { sport: string } }) {
+export default async function SportSite({ params }: { params: { sport: string } }) {
   const { sport } = params;
 
   return (

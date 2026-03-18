@@ -1,3 +1,17 @@
+  // Poll server storage every 2 seconds for real-time sync
+  useEffect(() => {
+    const pollInterval = setInterval(() => {
+      fetch("/api/storage", { cache: "no-store" })
+        .then(res => res.json())
+        .then(data => {
+          const entries = data.entries || {};
+          // Päivitä tarvittavat state-muuttujat entries-datasta
+          // Esimerkki: setPlayers(entries[playersStorageKey] ? JSON.parse(entries[playersStorageKey]) : []);
+          // Lisää tähän kaikki state-muuttujat joita haluat synkronoida
+        });
+    }, 2000);
+    return () => clearInterval(pollInterval);
+  }, []);
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -524,26 +538,28 @@ export default function Overlay() {
     if (typeof window === "undefined") return;
     if (startAt) return;
 
-    for (let i = 0; i < localStorage.length; i += 1) {
-      const key = localStorage.key(i) || "";
-      if (!key.endsWith(":matches")) continue;
-
-      try {
-        const raw = localStorage.getItem(key);
-        if (!raw) continue;
-        const parsed = JSON.parse(raw) as Array<{ matchId?: string; homeTeam?: string; awayTeam?: string; scheduledAt?: string }>;
-        if (!Array.isArray(parsed)) continue;
-
-        const normalizedHome = (homeTeam || "").trim().toLowerCase();
-        const normalizedAway = (awayTeam || "").trim().toLowerCase();
-        const normalizedCurrentMatchId = (matchId || "").trim().toLowerCase();
-
-        const found = parsed.find((item) => {
-          const byMatchId = typeof item.matchId === "string" && item.matchId.trim().toLowerCase() === normalizedCurrentMatchId;
-          const byTeams =
-            typeof item.homeTeam === "string" &&
-            typeof item.awayTeam === "string" &&
-            item.homeTeam.trim().toLowerCase() === normalizedHome &&
+    // Hae kaikki pelaajat serveriltä
+    fetch("/api/storage", { cache: "no-store" })
+      .then(res => res.json())
+      .then(data => {
+        const entries = data.entries || {};
+        Object.keys(entries).forEach(key => {
+          if (!key.endsWith(":players")) return;
+          try {
+            const parsed = JSON.parse(entries[key]);
+            if (!Array.isArray(parsed)) return;
+            parsed.forEach((player) => {
+              const fullName = `${player.firstName || ""} ${player.lastName || ""}`.trim();
+              const teamName = (player.team || "").trim();
+              const normalizedName = normalizePlayerName(fullName);
+              const photo = (player.photo || "").trim();
+              if (!teamName || !normalizedName || !photo) return;
+              nextMap[`${teamName.toLowerCase()}|${normalizedName}`] = photo;
+            });
+          } catch {}
+        });
+        setPlayerPhotoByTeamAndName(nextMap);
+      });
             item.awayTeam.trim().toLowerCase() === normalizedAway;
           return byMatchId || byTeams;
         });

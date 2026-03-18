@@ -19,7 +19,9 @@ export default function SportAdminPage() {
   // Restore session from localStorage on page load/refresh
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const stored = localStorage.getItem(AUTH_KEY);
+      const res = await fetch("/api/storage", { cache: "no-store" });
+      const data = await res.json();
+      const stored = data.entries?.[AUTH_KEY];
       if (stored === "true") {
         setIsAuthenticated(true);
       }
@@ -34,9 +36,11 @@ export default function SportAdminPage() {
       setError("");
       setUsername("");
       setPassword("");
-      if (typeof window !== "undefined") {
-        localStorage.setItem(AUTH_KEY, "true");
-      }
+      fetch("/api/storage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "set", key: AUTH_KEY, value: "true" })
+      });
       return;
     }
 
@@ -45,9 +49,11 @@ export default function SportAdminPage() {
 
   const handleLogout = () => {
     setIsAuthenticated(false);
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(AUTH_KEY);
-    }
+    fetch("/api/storage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "remove", key: AUTH_KEY })
+    });
   };
 
   if (!isAuthenticated) {

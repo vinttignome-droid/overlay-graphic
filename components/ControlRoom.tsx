@@ -14,6 +14,23 @@ interface ControlRoomProps {
 }
 
 export default function ControlRoom({ sport, onLogout }: ControlRoomProps) {
+        // Poll server storage every 2 seconds for real-time sync
+        useEffect(() => {
+          const pollInterval = setInterval(() => {
+            fetch("/api/storage", { cache: "no-store" })
+              .then(res => res.json())
+              .then(data => {
+                const entries = data.entries || {};
+                setLeagues(entries[leaguesStorageKey] ? JSON.parse(entries[leaguesStorageKey]) : []);
+                setTeams(entries[teamsStorageKey] ? JSON.parse(entries[teamsStorageKey]) : []);
+                setMatches(entries[matchesStorageKey] ? JSON.parse(entries[matchesStorageKey]) : []);
+                setPlayers(entries[playersStorageKey] ? JSON.parse(entries[playersStorageKey]) : []);
+                setLineupsByTeam(entries[lineupsStorageKey] ? JSON.parse(entries[lineupsStorageKey]) : {});
+                setFootballRotationsByTeam(entries[footballRotationsStorageKey] ? JSON.parse(entries[footballRotationsStorageKey]) : {});
+              });
+          }, 2000);
+          return () => clearInterval(pollInterval);
+        }, [leaguesStorageKey, teamsStorageKey, matchesStorageKey, playersStorageKey, lineupsStorageKey, footballRotationsStorageKey]);
       // Puuttuvat määrittelyt
       const router = useRouter();
       const availableSports = [
@@ -36,39 +53,20 @@ export default function ControlRoom({ sport, onLogout }: ControlRoomProps) {
   // Storage avaimet heti funktion alkuun
   // ...existing code...
 
-  // Kuuntele localStorage-muutoksia (esim. polling tai toinen selain)
+  // Lataa tiedot serveriltä (kovalevyltä) eikä selaimen localStoragesta
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const handleStorage = (event: StorageEvent) => {
-      // Synkronoi vain relevantit avaimet
-      if (!event.key) return;
-      const keys = [leaguesStorageKey, teamsStorageKey, matchesStorageKey, playersStorageKey, lineupsStorageKey, footballRotationsStorageKey];
-      if (!keys.includes(event.key)) return;
-      // Lataa uusimmat tiedot localStoragesta
-      try {
-        if (event.key === leaguesStorageKey) {
-          const raw = localStorage.getItem(leaguesStorageKey);
-          setLeagues(raw ? JSON.parse(raw) : []);
-        } else if (event.key === teamsStorageKey) {
-          const raw = localStorage.getItem(teamsStorageKey);
-          setTeams(raw ? JSON.parse(raw) : []);
-        } else if (event.key === matchesStorageKey) {
-          const raw = localStorage.getItem(matchesStorageKey);
-          setMatches(raw ? JSON.parse(raw) : []);
-        } else if (event.key === playersStorageKey) {
-          const raw = localStorage.getItem(playersStorageKey);
-          setPlayers(raw ? JSON.parse(raw) : []);
-        } else if (event.key === lineupsStorageKey) {
-          const raw = localStorage.getItem(lineupsStorageKey);
-          setLineupsByTeam(raw ? JSON.parse(raw) : {});
-        } else if (event.key === footballRotationsStorageKey) {
-          const raw = localStorage.getItem(footballRotationsStorageKey);
-          setFootballRotationsByTeam(raw ? JSON.parse(raw) : {});
-        }
-      } catch {}
+    const fetchStorage = async () => {
+      const res = await fetch("/api/storage", { cache: "no-store" });
+      const data = await res.json();
+      const entries = data.entries || {};
+      setLeagues(entries[leaguesStorageKey] ? JSON.parse(entries[leaguesStorageKey]) : []);
+      setTeams(entries[teamsStorageKey] ? JSON.parse(entries[teamsStorageKey]) : []);
+      setMatches(entries[matchesStorageKey] ? JSON.parse(entries[matchesStorageKey]) : []);
+      setPlayers(entries[playersStorageKey] ? JSON.parse(entries[playersStorageKey]) : []);
+      setLineupsByTeam(entries[lineupsStorageKey] ? JSON.parse(entries[lineupsStorageKey]) : {});
+      setFootballRotationsByTeam(entries[footballRotationsStorageKey] ? JSON.parse(entries[footballRotationsStorageKey]) : {});
     };
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    fetchStorage();
   }, [leaguesStorageKey, teamsStorageKey, matchesStorageKey, playersStorageKey, lineupsStorageKey, footballRotationsStorageKey]);
 
 type League = {

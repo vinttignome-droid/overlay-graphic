@@ -65,67 +65,9 @@ export default function ServerStorageSync() {
       }
 
       if (!cancelled) {
-        markServerSyncDone();
-      }
-
-      const storage = window.localStorage as Storage & {
-        __serverSyncPatched?: boolean;
-        __originalSetItem?: Storage["setItem"];
-        __originalRemoveItem?: Storage["removeItem"];
-      };
-
-      if (storage.__serverSyncPatched) return;
-
-      const originalSetItem = storage.setItem.bind(storage);
-      const originalRemoveItem = storage.removeItem.bind(storage);
-
-      storage.__originalSetItem = storage.setItem;
-      storage.__originalRemoveItem = storage.removeItem;
-      storage.__serverSyncPatched = true;
-
-      storage.setItem = (key: string, value: string) => {
-        originalSetItem(key, value);
-        if (shouldSyncKey(key)) {
-          void postUpdate({ type: "set", key, value });
-        }
-      };
-
-      storage.removeItem = (key: string) => {
-        originalRemoveItem(key);
-        if (shouldSyncKey(key)) {
-          void postUpdate({ type: "remove", key });
-        }
-      };
-    };
-
-    void initSync();
-
-    // POLLING: Hae serveriltä uusin data 5s välein ja päivitä localStorageen jos muuttunut
-    let lastServerEntries: Record<string, string> = {};
-    const pollInterval = setInterval(async () => {
-      try {
-        const response = await fetch("/api/storage", { cache: "no-store" });
-        const data = (await response.json()) as { entries?: Record<string, string> };
-        const serverEntries = data?.entries && typeof data.entries === "object" ? data.entries : {};
-        // Päivitä localStorage vain jos data muuttui
-        const changed = Object.keys(serverEntries).some(
-          (key) => shouldSyncKey(key) && serverEntries[key] !== lastServerEntries[key]
-        ) || Object.keys(lastServerEntries).some(
-          (key) => shouldSyncKey(key) && !(key in serverEntries)
-        );
-        if (changed) {
-          const rawStorage = window.localStorage as Storage & { __originalSetItem?: Storage["setItem"] };
-          const directSetItem = rawStorage.__originalSetItem
-            ? rawStorage.__originalSetItem.bind(rawStorage)
-            : window.localStorage.setItem.bind(window.localStorage);
-          Object.keys(serverEntries).forEach((key) => {
-            if (!shouldSyncKey(key)) return;
-            directSetItem(key, serverEntries[key]);
-          });
-          // Poista localStoragesta avaimet joita ei enää ole serverillä
-          Object.keys(lastServerEntries).forEach((key) => {
-            if (!shouldSyncKey(key)) return;
-            if (!(key in serverEntries)) {
+        useEffect(() => {
+          markServerSyncDone();
+        }, []);
               window.localStorage.removeItem(key);
             }
           });
