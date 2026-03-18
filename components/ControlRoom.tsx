@@ -18,7 +18,6 @@ export default function ControlRoom({ sport, onLogout }: ControlRoomProps) {
   const teamsStorageKey = `ligr:${sport}:teams`;
   const matchesStorageKey = `ligr:${sport}:matches`;
   const playersStorageKey = `ligr:${sport}:players`;
-  const lineupsStorageKey = `ligr:${sport}:lineups`;
   // ...existing code...
 
   // Kuuntele localStorage-muutoksia (esim. polling tai toinen selain)
