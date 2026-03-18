@@ -14,6 +14,13 @@ interface ControlRoomProps {
 }
 
 export default function ControlRoom({ sport, onLogout }: ControlRoomProps) {
+  // Storage avaimet heti funktion alkuun
+  const leaguesStorageKey = `ligr:${sport}:leagues`;
+  const teamsStorageKey = `ligr:${sport}:teams`;
+  const matchesStorageKey = `ligr:${sport}:matches`;
+  const playersStorageKey = `ligr:${sport}:players`;
+  const lineupsStorageKey = `ligr:${sport}:lineups`;
+  const footballRotationsStorageKey = `ligr:${sport}:football-rotations`;
   // ...existing code...
 
   // Kuuntele localStorage-muutoksia (esim. polling tai toinen selain)
